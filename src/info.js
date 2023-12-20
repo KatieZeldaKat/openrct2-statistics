@@ -1,9 +1,9 @@
-export const name = "name-of-your-plugin";
-export const authors = [ "Your name" ];
+export const name = "openrct2-statistics";
+export const authors = [ "Katherine Norton (KatieZeldaKat)" ];
 export const license = "MIT";
 
 export const version = "1.0.0";
-export const type = "remote";
+export const type = "intransient";
 
 /**
  * The following field determines which OpenRCT2 API version to use. It's best to always target

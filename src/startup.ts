@@ -1,16 +1,17 @@
 // @ts-ignore
 import * as info from "./info.js";
+import * as time from "./time/time";
 
 
 export function startup()
 {
-	// Write code here that should happen on startup of the plugin.
-	console.log("Hello world!");
+	time.initialize();
 
 	// Register a menu item under the map icon:
 	if (typeof ui !== "undefined")
 	{
-		ui.registerMenuItem(info.name, () => onClickMenuItem());
+		ui.registerMenuItem(info.name, onClickMenuItem);
+		ui.registerToolboxMenuItem(info.name, onClickMenuItem);
 	}
 }
 
