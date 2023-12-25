@@ -1,6 +1,7 @@
 // @ts-ignore
 import * as info from "../info.js";
 import { store } from "openrct2-flexui";
+import { areStatisticsPaused } from "../window/windowPause";
 
 const GAME_TIME_KEY = `${info.name}.time.gameTime`;
 const PARK_TIME_KEY = `${info.name}.time.parkTime`;
@@ -24,6 +25,11 @@ export function initialize()
 
 function addSecondToTime()
 {
+    if (areStatisticsPaused.get())
+    {
+        return;
+    }
+
     let newGameTime = timeData.gameTime.get() + 1
     timeData.gameTime.set(newGameTime);
 

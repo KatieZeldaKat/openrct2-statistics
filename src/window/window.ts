@@ -1,5 +1,6 @@
 import * as flex from "openrct2-flexui";
 import { getTimeWidget } from "./windowTime";
+import { getPausedWidget } from "./windowPause";
 
 let window: flex.WindowTemplate;
 let isWindowOpen = false;
@@ -23,6 +24,7 @@ export function openWindow()
         onClose: () => isWindowOpen = false,
         content: [
             getTimeWidget(),
+            getPausedWidget(),
         ],
     });
 
