@@ -67,7 +67,7 @@ function formatTime(totalSeconds: number): string
     {
         result += `${hours}h `;
     }
-    if (minutes > 0)
+    if (hours > 0 || minutes > 0)
     {
         result += `${ minutes < 10 ? '0' + minutes : minutes }m `;
     }
