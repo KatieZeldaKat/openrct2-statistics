@@ -8,28 +8,29 @@ const PARK_TIME_KEY = `${info.name}.time.parkTime`;
 
 // Time is stored in seconds
 export const timeData = {
-    gameTime: store(context.sharedStorage.get<number>(GAME_TIME_KEY, 0)),
+    gameTime: store(context.sharedStorage.get(GAME_TIME_KEY, 0)),
     parkTime: store(context.mode == "normal" ? context.getParkStorage().get(PARK_TIME_KEY, 0) : 0),
 }
+
+let secondIntervalHandle: number;
 
 
 export function initialize()
 {
-    timeData.gameTime.subscribe((newTime => context.sharedStorage.set(GAME_TIME_KEY, newTime)));
-    timeData.parkTime.subscribe((newTime => context.getParkStorage().set(PARK_TIME_KEY, newTime)));
-
-    context.setInterval(addSecondToTime, 1000);
+    timeData.gameTime.subscribe(newTime => context.sharedStorage.set(GAME_TIME_KEY, newTime));
+    timeData.parkTime.subscribe(newTime => context.getParkStorage().set(PARK_TIME_KEY, newTime));
+    areStatisticsPaused.subscribe(toggleInterval);
     context.subscribe("map.changed", resetParkTime);
+
+    if (!areStatisticsPaused.get())
+    {
+        toggleInterval(false);
+    }
 }
 
 
 function addSecondToTime()
 {
-    if (areStatisticsPaused.get())
-    {
-        return;
-    }
-
     let newGameTime = timeData.gameTime.get() + 1
     timeData.gameTime.set(newGameTime);
 
@@ -46,5 +47,18 @@ function resetParkTime()
     if (context.mode == "normal")
     {
         timeData.parkTime.set(context.getParkStorage().get(PARK_TIME_KEY, 0));
+    }
+}
+
+
+function toggleInterval(isPaused: boolean)
+{
+    if (isPaused)
+    {
+        context.clearInterval(secondIntervalHandle);
+    }
+    else
+    {
+        secondIntervalHandle = context.setInterval(addSecondToTime, 1000);
     }
 }
