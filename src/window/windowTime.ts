@@ -1,67 +1,67 @@
 import * as time from "../statistics/time";
-import { WidgetCreator, FlexiblePosition, Parsed,
-         groupbox, horizontal, label, store } from "openrct2-flexui";
-
-const SECONDS_IN_MINUTE = 60;
-const SECONDS_IN_HOUR = 3600;
-
-let gameTimeString = store("");
-let parkTimeString = store("");
+import { WidgetCreator, FlexiblePosition, Parsed, ElementVisibility,
+         groupbox, horizontal, label, store} from "openrct2-flexui";
 
 
 export function getTimeWidget(): WidgetCreator<FlexiblePosition>
 {
-    const text = "Time Spent In";
-    gameTimeString.set(formatTime(time.timeData.gameTime.get()));
-    parkTimeString.set(formatTime(time.timeData.parkTime.get()));
-
-    time.timeData.gameTime.subscribe(newTime => gameTimeString.set(formatTime(newTime)));
-    time.timeData.parkTime.subscribe(newTime => parkTimeString.set(formatTime(newTime)));
-
-    if (context.mode == "normal")
-    {
-        return groupbox({
-            text: text,
-            content: [
-                ...getNonParkContent(),
-                getParkContent(),
-            ],
-        });
-    }
-
     return groupbox({
-        text: text,
-        content: getNonParkContent(),
+        text: "Time Spent In",
+        content: [
+            getGameTimeWidget(),
+            getParkTimeWidget(),
+        ],
     });
 }
 
 
-function getParkContent(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
+function getGameTimeWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
 {
+    let gameTime = store(formatTime(time.timeData.gameTime.get()));
+    time.timeData.gameTime.subscribe(newTime => gameTime.set(formatTime(newTime)));
+
     return horizontal([
-        label({ text: `"${park.name}" -` }),
-        label({ text: parkTimeString }),
+        label({ text: "OpenRCT2 -" }),
+        label({ text: gameTime }),
     ]);
 }
 
 
-function getNonParkContent(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>[]
+function getParkTimeWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
 {
-    return [
-        horizontal([
-            label({ text: "OpenRCT2 - " }),
-            label({ text: gameTimeString }),
-        ]),
-    ];
+    const parkNameFormat = () => `"${park.name}" -`;
+
+    let parkName = store(parkNameFormat());
+    context.subscribe("map.changed", () => parkName.set(parkNameFormat()));
+    context.subscribe("action.execute", e => {
+        if (e.action == "parksetname")
+        {
+            parkName.set(parkNameFormat())
+        }
+    });
+
+    let parkTime = store(formatTime(time.timeData.parkTime.get()));
+    time.timeData.parkTime.subscribe(newTime => parkTime.set(formatTime(newTime)));
+
+    let parkWidgetIsVisible = store<ElementVisibility>(getParkWidgetIsVisible());
+    context.subscribe("map.changed", () => parkWidgetIsVisible.set(getParkWidgetIsVisible()));
+
+    return horizontal([
+        label({ text: parkName, visibility: parkWidgetIsVisible }),
+        label({ text: parkTime, visibility: parkWidgetIsVisible }),
+    ]);
 }
 
 
-function formatTime(seconds: number): string
+function formatTime(totalSeconds: number): string
 {
+    const SECONDS_IN_MINUTE = 60;
+    const SECONDS_IN_HOUR = 3600;
+
     let result = "";
-    let hours = Math.floor(seconds / SECONDS_IN_HOUR);
-    let minutes = Math.floor((seconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE);
-    seconds %= SECONDS_IN_MINUTE;
+    let hours = Math.floor(totalSeconds / SECONDS_IN_HOUR);
+    let minutes = Math.floor((totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE);
+    let seconds = totalSeconds % SECONDS_IN_MINUTE;
 
     if (hours > 0)
     {
@@ -74,4 +74,17 @@ function formatTime(seconds: number): string
     result += `${ seconds < 10 ? '0' + seconds : seconds }s`;
 
     return result;
+}
+
+
+function getParkWidgetIsVisible(): ElementVisibility
+{
+    if (context.mode == "normal")
+    {
+        return "visible";
+    }
+    else
+    {
+        return "none";
+    }
 }

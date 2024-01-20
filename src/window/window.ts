@@ -6,14 +6,8 @@ let window: flex.WindowTemplate;
 let isWindowOpen = false;
 
 
-export function openWindow()
+export function initialize()
 {
-    if (isWindowOpen)
-    {
-        window.focus();
-        return;
-    }
-
     window = flex.window({
         title: "OpenRCT2 Statistics",
         width: 250,
@@ -27,6 +21,17 @@ export function openWindow()
             getPausedWidget(),
         ],
     });
+}
 
-    window.open();
+
+export function openWindow()
+{
+    if (isWindowOpen)
+    {
+        window.focus();
+    }
+    else
+    {
+        window.open();
+    }
 }

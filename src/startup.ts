@@ -10,6 +10,8 @@ export function startup()
 
 	if (typeof ui !== "undefined")
 	{
+		window.initialize();
+
 		ui.registerMenuItem(info.name, window.openWindow);
 		ui.registerToolboxMenuItem(info.name, window.openWindow);
 	}
