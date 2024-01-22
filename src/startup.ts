@@ -1,22 +1,25 @@
-// @ts-ignore
-import * as info from "./info.js";
+import * as events from "./helpers/events";
+import * as time from "./statistics/time";
+import * as window from "./window/window";
+import * as windowWarning from "./window/windowWarning";
 
 
+/**
+ * The entry point for this plugin. Should initialize any tracking of statistics, and if the ui
+ * is enabled, it should also initialize the windows.
+ */
 export function startup()
 {
-	// Write code here that should happen on startup of the plugin.
-	console.log("Hello world!");
+	events.initialize();
+	time.initialize();
 
-	// Register a menu item under the map icon:
 	if (typeof ui !== "undefined")
 	{
-		ui.registerMenuItem(info.name, () => onClickMenuItem());
+		window.initialize();
+		windowWarning.initialize();
+
+		const menuItemName = "OpenRCT2 Statistics"
+		ui.registerMenuItem(menuItemName, window.openWindow);
+		ui.registerToolboxMenuItem(menuItemName, window.openWindow);
 	}
-}
-
-
-function onClickMenuItem()
-{
-	// Write code here that should happen when the player clicks the menu item under the map icon.
-	console.log("Clicked menu item");
 }
