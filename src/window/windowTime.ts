@@ -1,5 +1,7 @@
+import * as events from "../helpers/events";
 import * as time from "../statistics/time";
-import { WidgetCreator, FlexiblePosition, Parsed, ElementVisibility,
+import { getElementVisibility } from "../helpers/flexHelper";
+import { WidgetCreator, FlexiblePosition, Parsed,
          groupbox, horizontal, label, store} from "openrct2-flexui";
 
 
@@ -29,26 +31,19 @@ function getGameTimeWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePos
 
 function getParkTimeWidget(): WidgetCreator<FlexiblePosition, Parsed<FlexiblePosition>>
 {
-    const parkNameFormat = () => `"${park.name}" -`;
-
-    let parkName = store(parkNameFormat());
-    context.subscribe("map.changed", () => parkName.set(parkNameFormat()));
-    context.subscribe("action.execute", e => {
-        if (e.action == "parksetname")
-        {
-            parkName.set(parkNameFormat())
-        }
-    });
+    const parkNameFormat = (name: string) => `"${name}" -`;
+    let parkName = store(parkNameFormat(events.parkName.get()));
+    events.parkName.subscribe(newName => parkName.set(parkNameFormat(newName)));
 
     let parkTime = store(formatTime(time.timeData.parkTime.get()));
     time.timeData.parkTime.subscribe(newTime => parkTime.set(formatTime(newTime)));
 
-    let parkWidgetIsVisible = store<ElementVisibility>(getParkWidgetIsVisible());
-    context.subscribe("map.changed", () => parkWidgetIsVisible.set(getParkWidgetIsVisible()));
+    let isVisible = store(getElementVisibility(events.isInPark.get()));
+    events.isInPark.subscribe(inPark => isVisible.set(getElementVisibility(inPark)));
 
     return horizontal([
-        label({ text: parkName, visibility: parkWidgetIsVisible }),
-        label({ text: parkTime, visibility: parkWidgetIsVisible }),
+        label({ text: parkName, visibility: isVisible }),
+        label({ text: parkTime, visibility: isVisible }),
     ]);
 }
 
@@ -74,17 +69,4 @@ function formatTime(totalSeconds: number): string
     result += `${ seconds < 10 ? '0' + seconds : seconds }s`;
 
     return result;
-}
-
-
-function getParkWidgetIsVisible(): ElementVisibility
-{
-    if (context.mode == "normal")
-    {
-        return "visible";
-    }
-    else
-    {
-        return "none";
-    }
 }

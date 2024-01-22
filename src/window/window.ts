@@ -1,6 +1,7 @@
 import * as flex from "openrct2-flexui";
 import { getTimeWidget } from "./windowTime";
 import { getPausedWidget } from "./windowPause";
+import { getResetWidget } from "./windowReset";
 
 let window: flex.WindowTemplate;
 let isWindowOpen = false;
@@ -19,6 +20,7 @@ export function initialize()
         content: [
             getTimeWidget(),
             getPausedWidget(),
+            getResetWidget(),
         ],
     });
 }

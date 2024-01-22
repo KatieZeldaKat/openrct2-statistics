@@ -20,12 +20,24 @@ export function initialize()
     timeData.gameTime.subscribe(newTime => context.sharedStorage.set(GAME_TIME_KEY, newTime));
     timeData.parkTime.subscribe(newTime => context.getParkStorage().set(PARK_TIME_KEY, newTime));
     areStatisticsPaused.subscribe(toggleInterval);
-    context.subscribe("map.changed", resetParkTime);
+    context.subscribe("map.changed", initializeParkTime);
 
     if (!areStatisticsPaused.get())
     {
         toggleInterval(false);
     }
+}
+
+
+export function resetGenericTime()
+{
+    timeData.gameTime.set(0);
+}
+
+
+export function resetParkTime()
+{
+    timeData.parkTime.set(0);
 }
 
 
@@ -42,7 +54,7 @@ function addSecondToTime()
 }
 
 
-function resetParkTime()
+export function initializeParkTime()
 {
     if (context.mode == "normal")
     {
