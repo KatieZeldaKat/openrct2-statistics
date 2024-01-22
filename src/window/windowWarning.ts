@@ -34,6 +34,11 @@ export function initialize()
 }
 
 
+/**
+ * Creates a window asking the player to confirm a given action.
+ * @param warningMessage A message to display after the line: `"Are you sure you want to"`.
+ * @param warningCallback A function to be executed if the player confirms.
+ */
 export function openWarningWindow(warningMessage: string, warningCallback: () => void)
 {
     if (isWindowOpen)

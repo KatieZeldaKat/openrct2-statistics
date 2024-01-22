@@ -7,6 +7,9 @@ const STATS_PAUSED_KEY = `${info.name}.paused`;
 const FLAG_OPEN_ICON = 5180;
 const FLAG_CLOSED_ICON = 5179;
 
+/**
+ * If true, all statistics should refrain from being tracked.
+ */
 export const areStatisticsPaused = store(context.sharedStorage.get(STATS_PAUSED_KEY, false));
 
 let buttonIcon = store(getButtonIcon());

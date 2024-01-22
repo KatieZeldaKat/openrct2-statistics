@@ -1,6 +1,14 @@
 import { store } from "openrct2-flexui";
 
+/**
+ * Tracks if the player is currently playing a park/scenario.
+ */
 export const isInPark = store(context.mode == "normal");
+
+/**
+ * Tracks the name of the park the player is currently in. This can change even if a player is
+ * not playing a park/scenario, but behavior is undefined in this case.
+ */
 export const parkName = store(park.name);
 
 

@@ -26,6 +26,9 @@ export function initialize()
 }
 
 
+/**
+ * Opens the main window. If already open, the window will be focused.
+ */
 export function openWindow()
 {
     if (isWindowOpen)
