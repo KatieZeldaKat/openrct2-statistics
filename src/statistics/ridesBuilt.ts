@@ -56,6 +56,20 @@ const subscribeToRideBuiltHook = () => {
 // in other cases, you might add the new value to the existing value
 // or set the keys/values in an object or map
 function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
+  // check if the last ride is the same as the new ride
+  // if it is, then don't add it to the list
+
+  if (existingRides.length === 0) {
+    return [newRide];
+  } else {
+    const lastRide = existingRides[existingRides.length - 1];
+    if (
+      lastRide.rideId == newRide.rideId &&
+      lastRide.rideType == newRide.rideType
+    ) {
+      return existingRides;
+    }
+  }
   return [...existingRides, newRide];
 }
 
