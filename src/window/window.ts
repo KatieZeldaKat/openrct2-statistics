@@ -2,7 +2,6 @@ import * as flex from "openrct2-flexui";
 import { getTimeWidget } from "./windowTime";
 import { getPausedWidget } from "./windowPause";
 import { getResetWidget } from "./windowReset";
-import { getPlayTimeWidget } from "./playTimeWidget";
 import { StatController } from "../objects/StatController";
 
 let window: flex.WindowTemplate;
@@ -18,11 +17,14 @@ export function initialize(sc: StatController) {
     onOpen: () => (isWindowOpen = true),
     onClose: () => (isWindowOpen = false),
     content: [
+      // legacy time widget, is replicated in the StatController's widgets
       getTimeWidget(),
-      getPlayTimeWidget(),
       getPausedWidget(),
+      // pass in the StatController to pass through the reset functions
       getResetWidget(sc),
+      // spread in the widgets from the StatController
       ...sc.widgets,
+      // it's also possible to add widgets directly to the window if there are other custom widgets
     ],
   });
 }
