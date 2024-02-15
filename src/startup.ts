@@ -29,7 +29,7 @@ export function startup() {
   const vehiclesCrashedStat = vehiclesCrashedStatistic();
 
   // add the statistics to the controller
-  sc.add(ridesBuiltStat).add(vehiclesCrashedStat).add(timeSpentStat);
+  sc.add(timeSpentStat).add(ridesBuiltStat).add(vehiclesCrashedStat);
 
   if (typeof ui !== "undefined") {
     window.initialize(sc);
