@@ -6,150 +6,158 @@ The instructions below are taken from [Basssiiie's Typescript Template](https://
 
 ## Adding more statistics
 
-This plugin has been redesigned to offer easy extensibility for tracking new statistics. I suggest looking through `.src/statistics/ridesBuilt.ts` to see an existing implementation.
+This plugin has been redesigned to offer easy extensibility for tracking new statistics. I suggest looking through `src/statistics/ridesBuilt.ts` to see an existing implementation.
 
-Steps for designing your own statistic widget:
+### Steps for designing your own statistic widget:
 
 1. Identify the stat you want to track & make sure there's a way to actually do that in the game.
-   a. Look through the `HookType` and `ActionType` types for ideas of what can be listened for/hooked into. For example, you can listen to just ride creation events by subscribe to `action.execute` and filter the events for those which are `ridecreate`.
+    - Look through the `HookType` and `ActionType` types for ideas of what can be listened for/hooked into. For example, you can listen to just ride creation events by subscribe to `action.execute` and filter the events for those which are `ridecreate`.
 
-2. (optional) Create a type to describe the shape of your statistic you're going to track. This should be a single instance of the stat, not a group or array of stats. If you're tracking the amount of time played, this could be `type TimeSpendStat = number`. If you're doing something more complicated, an object could be useful, e.g. `type RideStat = {
-  rideId: number;
-  rideType: number;
-  rideObject: number;
-};`
+2. (optional) Create a type to describe the shape of your statistic you're going to track. This should be a single instance of the stat, not a group or array of stats. If you're tracking the amount of time played, this could be `type TimeSpendStat = number`. If you're doing something more complicated, an object could be useful, e.g.
+   ```ts
+   type RideStat = {
+     rideId: number;
+     rideType: number;
+     rideObject: number;
+   };
+5. Initialize a store with some default values based on your type. (These default values will never been used.)
 
-3. Initialize a store with some default values based on your type. (These default values will never been used.)
-
-`// the store that will hold the value of the statistic
-// initialized with a default value
-const newBuiltRide = store<RideStat>({
-  rideId: -1,
-  rideType: -1,
-  rideObject: -1,
-});`
-
+   ```ts
+   // the store that will hold the value of the statistic
+   // initialized with a default value
+   const newBuiltRide = store<RideStat>({
+      rideId: -1,
+      rideType: -1,
+      rideObject: -1,
+   });
 4. Write a function that subscribes to the event you're trying to track (a ride being destroyed, a second passing, a piece of scenery being placed), and in that event callback set the value into your store.
 
-`// function that tracks when the important event happens that we want to track
-// this function will subscribe to the hook when a ride is built
-// after doing some data processing, set the value of the store to the new value
-const subscribeToRideBuiltHook = () => {
-  context.subscribe("action.execute", (e) => {
-    // the event is very poorly typed, so having to cast it to the correct type
-    const event = e as unknown as {
-      action: ActionType;
-      args: { flags: number; rideType: number; rideObject: number };
-      result: { ride: number };
-    };
-    if (event.action == "ridecreate") {
-      // if the event's flags are greater than zero, it means they weren't actually executed and should be ignored
-      // sometimes the flags are overflowing to -2147483648, so we need to check for <= 0
-      if (event.args.flags <= 0) {
-        // can print the event if you want to see the flags and other data
-        console.log(`Ride built: ${JSON.stringify(event)}`);
-
-        // set the value of the store to the new ride
-        newBuiltRide.set({
-          rideId: event.result.ride,
-          rideType: event.args.rideType,
-          rideObject: event.args.rideObject,
-        });
-      }
-    }
-
-});
-};`
+   ```ts
+   // function that tracks when the important event happens that we want to track
+   // this function will subscribe to the hook when a ride is built
+   // after doing some data processing, set the value of the store to the new value
+   const subscribeToRideBuiltHook = () => {
+     context.subscribe("action.execute", (e) => {
+       // the event is very poorly typed, so having to cast it to the correct type
+       const event = e as unknown as {
+         action: ActionType;
+         args: { flags: number; rideType: number; rideObject: number };
+         result: { ride: number };
+       };
+       if (event.action == "ridecreate") {
+         // if the event's flags are greater than zero, it means they weren't actually executed and should be ignored
+         // sometimes the flags are overflowing to -2147483648, so we need to check for <= 0
+         if (event.args.flags <= 0) {
+           // can print the event if you want to see the flags and other data
+           console.log(`Ride built: ${JSON.stringify(event)}`);
+   
+           // set the value of the store to the new ride
+           newBuiltRide.set({
+             rideId: event.result.ride,
+             rideType: event.args.rideType,
+             rideObject: event.args.rideObject,
+           });
+         }
+       }
+   
+   });
+   };
 
 5. Write an accumulator function. This will give direction on how to add each new event's data into the existing list. This is where you'll give definition to how your data gets stored when any new event gets added. Here are two examples:
 
-- For a widget tracking rides built
-  `// function showing how to accumulate the new value into the existing value
-// in this case, we're just adding the new ride to the list of rides
-// in other cases, you might add the new value to the existing value
-// or set the keys/values in an object or map
-function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
-  return [...existingRides, newRide];
-}`
+- For a widget tracking rides built:
+  ```ts
+   // function showing how to accumulate the new value into the existing value
+   // in this case, we're just adding the new ride to the list of rides
+   // in other cases, you might add the new value to the existing value
+   // or set the keys/values in an object or map
+   function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
+     return [...existingRides, newRide];
+   }
 
 - For a widget tracking amount of time passed
-  `// each time the hook is called, we want to add 1 to the existing time value
-// the function expects that we'll do something with the new value and the existing value
-// but in this case, we're just going to ignore the new value and just add 1 to the existing value
-function accumulateSeconds(\_newVal: TimeSpendStat, existingVal: TimeSpendStat) {
-return existingVal + 1;
-}`
+  ```ts
+  // each time the hook is called, we want to add 1 to the existing time value
+   // the function expects that we'll do something with the new value and the existing value
+   // but in this case, we're just going to ignore the new value and just add 1 to the existing value
+   function accumulateSeconds(_newVal: TimeSpendStat, existingVal: TimeSpendStat) {
+      return existingVal + 1;
+   }
 
 6. Write a function to define how the data should be processed before it's shown in the widget.
 
 - For a widget tracking rides built
-  `// function that formats the value of the statistic for display
+  ```ts
+   // function that formats the value of the statistic for display
    // in this case, it's just the number of rides built
    // but I could see it being reformatted to show the names of the rides built or something else
    // and displayed in a different widget
    function formatDisplay(ridesBuilt: RideStat[]): string {
-   const numberOfRides = Object.keys(ridesBuilt).length;
-   return `${numberOfRides}`;
-}`
+      const numberOfRides = Object.keys(ridesBuilt).length;
+      return `${numberOfRides}`;
+   }
 - For a widget tracking amount of time passed
-  `function formatDisplay(totalSeconds: number): string {
+  ```ts
+  function formatDisplay(totalSeconds: number): string {
   const SECONDS_IN_MINUTE = 60;
   const SECONDS_IN_HOUR = 3600;
 
   let result = "";
   let hours = Math.floor(totalSeconds / SECONDS_IN_HOUR);
-  let minutes = Math.floor(
-  (totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE
-  );
+  let minutes = Math.floor((totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE);
   let seconds = totalSeconds % SECONDS_IN_MINUTE;
 
   if (hours > 0) {
-  result += `${hours}h `;
+     result += `${hours}h `;
   }
   if (hours > 0 || minutes > 0) {
-  result += `${minutes < 10 ? "0" + minutes : minutes}m `;
+     result += `${minutes < 10 ? "0" + minutes : minutes}m `;
   }
   result += `${seconds < 10 ? "0" + seconds : seconds}s`;
 
   return result;
-  }`
-
-  7. Write a function to start listening to your hook from #1, creating a Statistic object, and returning it.
-     `// function that creates the Statistic object and which is exported
-     export const ridesBuiltStatistic = () => {
+  }
+7. Write a function to start listening to your hook from #1, creating a Statistic object, and returning it.   
+  ```ts
+// function that creates the Statistic object and which is exported
+  export const ridesBuiltStatistic = () => {
      const key = STATISTIC_KEY;
      const title = STATISTIC_TITLE;
      // the store that holds the value of the newest occurrence of the event
      const statStore = newBuiltRide;
+   
+      // call the function that subscribes to the hook
+      subscribeToRideBuiltHook();
+      
+      // create the Statistic object and return it
+      return new Statistic({
+         key,
+         title,
+         statStore,
+         resetValue: [],
+         formatDisplay,
+         accumulator: accumulateNewRide,
+      });
+   };
+```
 
-  // call the function that subscribes to the hook
-  subscribeToRideBuiltHook();
+8. Finally, open `./src/startup.ts` and your new statistic into the file
+- Call your exported function from #7
+- Add it into the statController so a widget will be created
+   ```ts
+   // track how much time has been spent in the game
+   const timeSpentStat = timeSpentStatistic();
+   
+   // track how many rides were built
+   const ridesBuiltStat = ridesBuiltStatistic();
+   
+   // track how many vehicles have crashed
+   const vehiclesCrashedStat = vehiclesCrashedStatistic();
+   
+   // add the statistics to the controller
+   sc.add(timeSpentStat).add(ridesBuiltStat).add(vehiclesCrashedStat);
 
-  // create the Statistic object and return it
-  return new Statistic({
-  key,
-  title,
-  statStore,
-  resetValue: [],
-  formatDisplay,
-  accumulator: accumulateNewRide,
-  });
-  };`
 
-  8. Finally, open `./src/startup.ts` and your new statistic into the file
-     a.call your exported function from #7
-     b. add it into the statController so a widget will be created
-     ` // track how much time has been spent in the game
-     const timeSpentStat = timeSpentStatistic();
-
-  // track how many rides were built
-  const ridesBuiltStat = ridesBuiltStatistic();
-
-  // track how many vehicles have crashed
-  const vehiclesCrashedStat = vehiclesCrashedStatistic();
-
-  // add the statistics to the controller
-  sc.add(timeSpentStat).add(ridesBuiltStat).add(vehiclesCrashedStat);`
 
 ## How to start
 
