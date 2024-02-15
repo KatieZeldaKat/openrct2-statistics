@@ -3,11 +3,12 @@ import { getTimeWidget } from "./windowTime";
 import { getPausedWidget } from "./windowPause";
 import { getResetWidget } from "./windowReset";
 import { getPlayTimeWidget } from "./playTimeWidget";
+import { StatController } from "../objects/StatController";
 
 let window: flex.WindowTemplate;
 let isWindowOpen = false;
 
-export function initialize() {
+export function initialize(sc: StatController) {
   window = flex.window({
     title: "OpenRCT2 Statistics",
     width: 250,
@@ -20,7 +21,8 @@ export function initialize() {
       getTimeWidget(),
       getPlayTimeWidget(),
       getPausedWidget(),
-      getResetWidget(),
+      getResetWidget(sc),
+      ...sc.widgets,
     ],
   });
 }

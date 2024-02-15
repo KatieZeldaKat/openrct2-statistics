@@ -49,9 +49,9 @@ function getGameStatWidget<T>(
   return horizontal([
     label({ text: "OpenRCT2 -" }),
     label({
-      text: compute(statStore, (value) =>
-        processStat ? processStat(value) : JSON.stringify(value)
-      ),
+      text: compute(statStore, (value) => {
+        return processStat ? processStat(value) : JSON.stringify(value);
+      }),
     }),
   ]);
 }
