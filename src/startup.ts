@@ -19,14 +19,14 @@ export function startup() {
   events.initialize();
   time.initialize();
 
+  // track how much time has been spent in the game
+  const timeSpentStat = timeSpentStatistic();
+
   // track how many rides were built
   const ridesBuiltStat = ridesBuiltStatistic();
 
   // track how many vehicles have crashed
   const vehiclesCrashedStat = vehiclesCrashedStatistic();
-
-  // track how much time has been spent in the game
-  const timeSpentStat = timeSpentStatistic();
 
   // add the statistics to the controller
   sc.add(ridesBuiltStat).add(vehiclesCrashedStat).add(timeSpentStat);

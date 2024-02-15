@@ -18,12 +18,13 @@ export function initialize(sc: StatController) {
     onClose: () => (isWindowOpen = false),
     content: [
       // legacy time widget, is replicated in the StatController's widgets
-      getTimeWidget(),
+      // getTimeWidget(),
+      // spread in the widgets from the StatController
+      // including the new timeSpent widget
+      ...sc.widgets,
       getPausedWidget(),
       // pass in the StatController to pass through the reset functions
       getResetWidget(sc),
-      // spread in the widgets from the StatController
-      ...sc.widgets,
       // it's also possible to add widgets directly to the window if there are other custom widgets
     ],
   });

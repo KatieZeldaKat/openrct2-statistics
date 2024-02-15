@@ -38,7 +38,7 @@ const subscribeToRideBuiltHook = () => {
       // sometimes the flags are overflowing to -2147483648, so we need to check for <= 0
       if (event.args.flags <= 0) {
         // can print the event if you want to see the flags and other data
-        // console.log(`Ride built: ${JSON.stringify(event)}`);
+        console.log(`Ride built: ${JSON.stringify(event)}`);
 
         // set the value of the store to the new ride
         newBuiltRide.set({
