@@ -128,10 +128,6 @@ export class Statistic<T, U> {
     }
   }
 
-  toggleStatRecordingPause(isPaused: boolean) {
-    this.isPaused = isPaused;
-  }
-
   /**
    * Initializes the game stat store. Stores the values across all parks and play sessions
    */
