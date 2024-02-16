@@ -1,5 +1,8 @@
 export const name = "openrct2-statistics";
-export const authors = [ "Katherine Norton (KatieZeldaKat)" ];
+export const authors = [
+  "Katherine Norton (KatieZeldaKat)",
+  "Smitty Penman (ltsSmitty)",
+];
 export const license = "MIT";
 
 export const version = "1.0.0";

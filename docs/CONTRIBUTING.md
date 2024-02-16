@@ -59,7 +59,7 @@ When your plugin is not loading properly, it may be useful to be able to read th
 
 1. Navigate to the folder where [OpenRCT2 is installed](#openrct2-installation-directory).
 2. Launch the `openrct2.com` file located there (the MS-DOS application).
-	- If file extensions are hidden, make sure to [enable them](https://support.microsoft.com/en-us/windows/common-file-name-extensions-in-windows-da4a4430-8e76-89c5-59f7-1cdbbc75cb01).
+   - If file extensions are hidden, make sure to [enable them](https://support.microsoft.com/en-us/windows/common-file-name-extensions-in-windows-da4a4430-8e76-89c5-59f7-1cdbbc75cb01).
 
 ### MacOS
 
