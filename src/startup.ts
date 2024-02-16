@@ -15,7 +15,7 @@ import { vehiclesCrashedStatistic } from "./statistics/vehiclesCrashed";
  */
 export function startup() {
   // a container to hold all the statistics data/widgets for easy pausing and resetting
-  const sc = new StatController();
+  const statController = new StatController();
   events.initialize();
   time.initialize();
 
@@ -29,10 +29,13 @@ export function startup() {
   const vehiclesCrashedStat = vehiclesCrashedStatistic();
 
   // add the statistics to the controller
-  sc.add(timeSpentStat).add(ridesBuiltStat).add(vehiclesCrashedStat);
+  statController
+    .add(timeSpentStat)
+    .add(ridesBuiltStat)
+    .add(vehiclesCrashedStat);
 
   if (typeof ui !== "undefined") {
-    window.initialize(sc);
+    window.initialize(statController);
     windowWarning.initialize();
 
     const menuItemName = "OpenRCT2 Statistics";
