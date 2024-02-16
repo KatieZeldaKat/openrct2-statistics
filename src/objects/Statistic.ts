@@ -91,11 +91,12 @@ export class Statistic<T, U> {
     // Subscribe to the pause event
     areStatisticsPaused.subscribe((isPaused) => (this.isPaused = isPaused));
 
-    if (context.mode == "normal") {
-      context.subscribe("map.changed", () => {
-        this.resetParkStat();
-      });
-    }
+    // Make sure to load the park stat when the map changes
+    // I'm not actually sure if this is needed;
+    // I think all plugins re-initialize when the map changes
+    context.subscribe("map.changed", () => {
+      this.loadParkStat();
+    });
 
     // whenever the stat value changes, update the game and park stat stores
     this.statValueStore.subscribe((newValue) => {
@@ -118,8 +119,13 @@ export class Statistic<T, U> {
     this.gameStatStore.set(this.resetValue);
   }
 
-  resetParkStat() {
-    this.parkStatStore.set(this.resetValue);
+  loadParkStat() {
+    if (context.mode == "normal") {
+      const parkStatKey = `${info.name}.${this.statKey}.parkValue`;
+      this.parkStatStore.set(
+        context.getParkStorage().get(parkStatKey, this.resetValue)
+      );
+    }
   }
 
   toggleStatRecordingPause(isPaused: boolean) {
