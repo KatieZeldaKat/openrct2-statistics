@@ -45,15 +45,13 @@ export function createStatWidget<T>(props: {
 
 function getGameStatWidget<T>(
   statStore: Store<T>,
-  processStat?: (stat: T) => string
+  processStat: (stat: T) => string
 ) {
   return horizontal([
     label({ text: "OpenRCT2 -" }),
     label({
       // Compute lets you use a store's value to create a new value
-      text: compute(statStore, (value) => {
-        return processStat ? processStat(value) : JSON.stringify(value);
-      }),
+      text: compute(statStore, (value) => processStat(value)),
     }),
   ]);
 }
