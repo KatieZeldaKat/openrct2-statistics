@@ -34,7 +34,7 @@ export const timeSpentStatistic = () => {
 
   subscribeToTimePassing();
 
-  return new Statistic({
+  const statistic = new Statistic({
     key,
     title,
     statStore,
@@ -42,6 +42,47 @@ export const timeSpentStatistic = () => {
     formatDisplay,
     accumulator: accumulateSeconds,
   });
+
+  // LEGACY SUPPORT FOR TRACKING TIME IN-GAME
+  const legacyGameTimeKey = "openrct2-statistics.time.gameTime";
+  if (
+    // unfortunately there's no way to get rid of a key,
+    // so needing to check if it exists and if it has a value every time
+    context.sharedStorage.get(legacyGameTimeKey) != null
+  ) {
+    // To prevent a conflict when importing the shared storage, wait a second beforehand
+    context.setTimeout(() => {
+      let legacyTime = context.sharedStorage.get(legacyGameTimeKey) as number;
+      if (legacyTime >= 0) {
+        statistic.gameStatStore.set(legacyTime + 1);
+        // Prevent legacy value from being imported more than once
+        context.sharedStorage.set(legacyGameTimeKey, undefined);
+      }
+    }, 1000);
+  }
+  // LEGACY SUPPORT FOR TRACKING TIME IN PARKS
+  context.subscribe("map.changed", () => {
+    const legacyParkTimeKey = "openrct2-statistics.time.parkTime";
+    if (
+      context.mode == "normal" &&
+      // unfortunately there's no way to get rid of a key,
+      // check if the legacy key exists and has a value
+      context.getParkStorage().get(legacyParkTimeKey) != null
+    ) {
+      // To prevent a conflict when importing the park storage, wait a second beforehand
+      context.setTimeout(() => {
+        let legacyTime = context
+          .getParkStorage()
+          .get(legacyParkTimeKey) as number;
+        if (legacyTime >= 0) {
+          statistic.parkStatStore.set(legacyTime + 1);
+          // Prevent legacy value from being imported more than once
+          context.getParkStorage().set(legacyParkTimeKey, undefined);
+        }
+      }, 1000);
+    }
+  });
+  return statistic;
 };
 
 function formatDisplay(totalSeconds: number): string {
