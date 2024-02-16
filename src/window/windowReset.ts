@@ -54,12 +54,14 @@ export function getResetWidget(
   });
 }
 
-function resetGenericStatistics(sc: StatController) {
+function resetGenericStatistics(statController: StatController) {
   openWarningWindow("reset cumulative statistics?", () =>
-    sc.resetGameStatistics()
+    statController.resetGameStatistics()
   );
 }
 
-function resetParkStatistics(sc: StatController) {
-  openWarningWindow("reset park statistics?", () => sc.resetParkStatistics());
+function resetParkStatistics(statController: StatController) {
+  openWarningWindow("reset park statistics?", () =>
+    statController.resetParkStatistics()
+  );
 }
