@@ -58,7 +58,7 @@ function getGameStatWidget<T>(
 
 function getParkStatWidget<T>(
   statStore: Store<T>,
-  processStat?: (stat: T) => string
+  processStat: (stat: T) => string
 ) {
   const parkNameFormat = (name: string) => `"${name}" -`;
   const isVisible = compute(events.isInPark, (isInPark) =>
@@ -71,9 +71,7 @@ function getParkStatWidget<T>(
       visibility: isVisible,
     }),
     label({
-      text: compute(statStore, (value) =>
-        processStat ? processStat(value) : JSON.stringify(value)
-      ),
+      text: compute(statStore, (value) => processStat(value)),
       visibility: isVisible,
     }),
   ]);
