@@ -104,8 +104,6 @@ export class Statistic<T, U> {
     areStatisticsPaused.subscribe((isPaused) => (this.isPaused = isPaused));
 
     // Make sure to load the park stat when the map changes
-    // I'm not actually sure if this is needed;
-    // I think all plugins re-initialize when the map changes
     context.subscribe("map.changed", () => {
       this.loadParkStat();
     });
