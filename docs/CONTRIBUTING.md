@@ -28,7 +28,8 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
 
    ```ts
    // A tad unwieldy, but we need to create a function that will be called whenever the statistic is updated
-   // In this case, this function will be called every second, and will add 1 (for one second) to the existing time value
+   // In this case, this function will be called every second,
+   // and will add 1 (for one second) to the existing time value
    const subscribeToTimePassing = (
      // Create a callback function inside the main subscription function
      // This callback function will be called in partnership with the accumulator function to update the stat value
