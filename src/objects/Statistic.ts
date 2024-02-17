@@ -11,8 +11,12 @@ export class Statistic<T, U> {
   /** The display name on the widget*/
   statName!: string;
 
-  /** The store that holds the value of the most recent stat */
-  statValueStore!: WritableStore<T>;
+  /**
+   * A function that allows subscribing to updates of the statistic value.
+   * @param updateStat - A callback function that will be called when the statistic value is updated.
+   *                     It takes a single parameter, newValue, which represents the new value of the statistic.
+   */
+  subscriber!: (updateStat: (newValue: T) => void) => void;
 
   /** The store that holds the value of the game stat */
   gameStatStore!: WritableStore<U>;
@@ -50,8 +54,12 @@ export class Statistic<T, U> {
     /** The display name on the widget*/
     title: string;
 
-    /** The store that holds the value of the most recent stat */
-    statStore: WritableStore<T>;
+    /**
+     * A function that allows subscribing to updates of the statistic value.
+     * @param updateStat - A callback function that will be called when the statistic value is updated.
+     *                     It takes a single parameter, newValue, which represents the new value of the statistic.
+     */
+    subscriber: (updateStat: (newValue: T) => void) => void;
 
     /** The value when resetting the game stat. Should be an empty-ish value,
      * e.g. 0, "", [], etc.
@@ -71,15 +79,19 @@ export class Statistic<T, U> {
      */
     accumulator: (newValue: T, oldValue: U) => U;
   }) {
-    const { key, title, statStore, resetValue, formatDisplay, accumulator } =
+    const { key, title, subscriber, resetValue, formatDisplay, accumulator } =
       props;
 
     this.statKey = key;
     this.statName = title;
     this.resetValue = resetValue;
-    this.statValueStore = statStore;
+    this.subscriber = subscriber;
     this.formatDisplay = formatDisplay;
     this.accumulator = accumulator;
+
+    // Copilot says to bind the updateStat function to the class
+    // so that it can be passed as a callback
+    this.subscriber(this.updateStat.bind(this));
 
     this.initialize();
   }
@@ -97,22 +109,21 @@ export class Statistic<T, U> {
     context.subscribe("map.changed", () => {
       this.loadParkStat();
     });
+  }
 
-    // whenever the stat value changes, update the game and park stat stores
-    this.statValueStore.subscribe((newValue) => {
-      if (this.isPaused) {
-        return;
-      }
-      const oldValue = this.gameStatStore.get();
-      // run the new value through the accumulator function
-      const newGameStoreValue = this.accumulator(newValue, oldValue);
-      this.gameStatStore.set(newGameStoreValue);
+  updateStat(newValue: T) {
+    if (this.isPaused) {
+      return;
+    }
 
-      const parkOldValue = this.parkStatStore.get();
-      // run the new value through the accumulator function
-      const newParkStoreValue = this.accumulator(newValue, parkOldValue);
-      this.parkStatStore.set(newParkStoreValue);
-    });
+    const oldValue = this.gameStatStore.get();
+    const newGameStoreValue = this.accumulator(newValue, oldValue);
+    this.gameStatStore.set(newGameStoreValue);
+
+    // handle park stat
+    const parkOldValue = this.parkStatStore.get();
+    const newParkStoreValue = this.accumulator(newValue, parkOldValue);
+    this.parkStatStore.set(newParkStoreValue);
   }
 
   resetGameStat() {
