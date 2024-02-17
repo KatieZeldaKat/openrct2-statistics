@@ -1,5 +1,4 @@
 import * as flex from "openrct2-flexui";
-import { getTimeWidget } from "./windowTime";
 import { getPausedWidget } from "./windowPause";
 import { getResetWidget } from "./windowReset";
 import { StatController } from "../objects/StatController";

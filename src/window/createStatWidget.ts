@@ -26,10 +26,11 @@ export function createStatWidget<T>(props: {
   gameStatStore: Store<T>;
   /** The store with this park stat values*/
   parkStatStore: Store<T>;
-  /** Opional function to process the stat value,
+  /**
+   * Function to process the stat value,
    * e.g. to process time in seconds into nice human-readable text,
    * or to take the take the length of an array instead of its values*/
-  processStat?: (stat: T) => string;
+  processStat: (stat: T) => string;
 }): WidgetCreator<FlexiblePosition> {
   const { title, gameStatStore, parkStatStore, processStat } = props;
 
@@ -44,22 +45,20 @@ export function createStatWidget<T>(props: {
 
 function getGameStatWidget<T>(
   statStore: Store<T>,
-  processStat?: (stat: T) => string
+  processStat: (stat: T) => string
 ) {
   return horizontal([
     label({ text: "OpenRCT2 -" }),
     label({
       // Compute lets you use a store's value to create a new value
-      text: compute(statStore, (value) => {
-        return processStat ? processStat(value) : JSON.stringify(value);
-      }),
+      text: compute(statStore, (value) => processStat(value)),
     }),
   ]);
 }
 
 function getParkStatWidget<T>(
   statStore: Store<T>,
-  processStat?: (stat: T) => string
+  processStat: (stat: T) => string
 ) {
   const parkNameFormat = (name: string) => `"${name}" -`;
   const isVisible = compute(events.isInPark, (isInPark) =>
@@ -72,9 +71,7 @@ function getParkStatWidget<T>(
       visibility: isVisible,
     }),
     label({
-      text: compute(statStore, (value) =>
-        processStat ? processStat(value) : JSON.stringify(value)
-      ),
+      text: compute(statStore, (value) => processStat(value)),
       visibility: isVisible,
     }),
   ]);

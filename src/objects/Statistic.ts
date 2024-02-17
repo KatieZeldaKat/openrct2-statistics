@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as info from "../info.js";
-import { createStatWidget } from "../window/createStatWidget.js";
+import { createStatWidget } from "../window/createStatWidget";
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
 
@@ -11,8 +11,12 @@ export class Statistic<T, U> {
   /** The display name on the widget*/
   statName!: string;
 
-  /** The store that holds the value of the most recent stat */
-  statValueStore!: WritableStore<T>;
+  /**
+   * A function that allows subscribing to updates of the statistic value.
+   * @param updateStat - A callback function that will be called when the statistic value is updated.
+   *                     It takes a single parameter, newValue, which represents the new value of the statistic.
+   */
+  subscriber!: (updateStat: (newValue: T) => void) => void;
 
   /** The store that holds the value of the game stat */
   gameStatStore!: WritableStore<U>;
@@ -50,8 +54,12 @@ export class Statistic<T, U> {
     /** The display name on the widget*/
     title: string;
 
-    /** The store that holds the value of the most recent stat */
-    statStore: WritableStore<T>;
+    /**
+     * A function that allows subscribing to updates of the statistic value.
+     * @param updateStat - A callback function that will be called when the statistic value is updated.
+     *                     It takes a single parameter, newValue, which represents the new value of the statistic.
+     */
+    subscriber: (updateStat: (newValue: T) => void) => void;
 
     /** The value when resetting the game stat. Should be an empty-ish value,
      * e.g. 0, "", [], etc.
@@ -71,15 +79,19 @@ export class Statistic<T, U> {
      */
     accumulator: (newValue: T, oldValue: U) => U;
   }) {
-    const { key, title, statStore, resetValue, formatDisplay, accumulator } =
+    const { key, title, subscriber, resetValue, formatDisplay, accumulator } =
       props;
 
     this.statKey = key;
     this.statName = title;
     this.resetValue = resetValue;
-    this.statValueStore = statStore;
+    this.subscriber = subscriber;
     this.formatDisplay = formatDisplay;
     this.accumulator = accumulator;
+
+    // Copilot says to bind the updateStat function to the class
+    // so that it can be passed as a callback
+    this.subscriber(this.updateStat.bind(this));
 
     this.initialize();
   }
@@ -91,39 +103,40 @@ export class Statistic<T, U> {
     // Subscribe to the pause event
     areStatisticsPaused.subscribe((isPaused) => (this.isPaused = isPaused));
 
-    if (context.mode == "normal") {
-      context.subscribe("map.changed", () => {
-        this.resetParkStat();
-      });
+    // Make sure to load the park stat when the map changes
+    // I'm not actually sure if this is needed;
+    // I think all plugins re-initialize when the map changes
+    context.subscribe("map.changed", () => {
+      this.loadParkStat();
+    });
+  }
+
+  updateStat(newValue: T) {
+    if (this.isPaused) {
+      return;
     }
 
-    // whenever the stat value changes, update the game and park stat stores
-    this.statValueStore.subscribe((newValue) => {
-      if (this.isPaused) {
-        return;
-      }
-      const oldValue = this.gameStatStore.get();
-      // run the new value through the accumulator function
-      const newGameStoreValue = this.accumulator(newValue, oldValue);
-      this.gameStatStore.set(newGameStoreValue);
+    const oldValue = this.gameStatStore.get();
+    const newGameStoreValue = this.accumulator(newValue, oldValue);
+    this.gameStatStore.set(newGameStoreValue);
 
-      const parkOldValue = this.parkStatStore.get();
-      // run the new value through the accumulator function
-      const newParkStoreValue = this.accumulator(newValue, parkOldValue);
-      this.parkStatStore.set(newParkStoreValue);
-    });
+    // handle park stat
+    const parkOldValue = this.parkStatStore.get();
+    const newParkStoreValue = this.accumulator(newValue, parkOldValue);
+    this.parkStatStore.set(newParkStoreValue);
   }
 
   resetGameStat() {
     this.gameStatStore.set(this.resetValue);
   }
 
-  resetParkStat() {
-    this.parkStatStore.set(this.resetValue);
-  }
-
-  toggleStatRecordingPause(isPaused: boolean) {
-    this.isPaused = isPaused;
+  loadParkStat() {
+    if (context.mode == "normal") {
+      const parkStatKey = `${info.name}.${this.statKey}.parkValue`;
+      this.parkStatStore.set(
+        context.getParkStorage().get(parkStatKey, this.resetValue)
+      );
+    }
   }
 
   /**
