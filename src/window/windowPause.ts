@@ -8,6 +8,7 @@ import {
   horizontal,
   button,
   label,
+  compute,
 } from "openrct2-flexui";
 
 const STATS_PAUSED_KEY = `${info.name}.paused`;
@@ -21,12 +22,7 @@ export const areStatisticsPaused = store(
   context.sharedStorage.get(STATS_PAUSED_KEY, false)
 );
 
-let buttonIcon = store(getButtonIcon());
-let pausedText = store(getPausedText());
-
 export function getPausedWidget(): WidgetCreator<FlexiblePosition> {
-  areStatisticsPaused.subscribe((_) => buttonIcon.set(getButtonIcon()));
-  areStatisticsPaused.subscribe((_) => pausedText.set(getPausedText()));
   areStatisticsPaused.subscribe((paused) =>
     context.sharedStorage.set(STATS_PAUSED_KEY, paused)
   );
@@ -36,29 +32,28 @@ export function getPausedWidget(): WidgetCreator<FlexiblePosition> {
     content: [
       horizontal([
         button({
-          image: buttonIcon,
+          image: compute(areStatisticsPaused, (paused) =>
+            getButtonIcon(paused)
+          ),
           width: "25px",
           height: "25px",
           onClick: () => areStatisticsPaused.set(!areStatisticsPaused.get()),
         }),
-        label({ text: pausedText, padding: "6px" }),
+        label({
+          text: compute(areStatisticsPaused, (paused) => getPausedText(paused)),
+          padding: "6px",
+        }),
       ]),
     ],
   });
 }
 
-function getButtonIcon() {
-  if (areStatisticsPaused.get()) {
-    return FLAG_CLOSED_ICON;
-  }
-
-  return FLAG_OPEN_ICON;
+function getButtonIcon(isPaused: boolean) {
+  return isPaused ? FLAG_CLOSED_ICON : FLAG_OPEN_ICON;
 }
 
-function getPausedText() {
-  if (areStatisticsPaused.get()) {
-    return "{LIGHTPINK}Statistics are paused.";
-  }
-
-  return "Statistics are running.";
+function getPausedText(isPaused: boolean) {
+  return isPaused
+    ? "{LIGHTPINK}Statistics are paused."
+    : "Statistics are running.";
 }
