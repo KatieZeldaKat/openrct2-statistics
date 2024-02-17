@@ -126,10 +126,6 @@ export class Statistic<T, U> {
     this.parkStatStore.set(newParkStoreValue);
   }
 
-  resetGameStat() {
-    this.gameStatStore.set(this.resetValue);
-  }
-
   loadParkStat() {
     if (context.mode == "normal") {
       const parkStatKey = `${info.name}.${this.statKey}.parkValue`;
