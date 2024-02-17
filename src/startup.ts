@@ -1,5 +1,4 @@
 import * as events from "./helpers/events";
-import * as time from "./statistics/time";
 import * as window from "./window/window";
 import * as windowWarning from "./window/windowWarning";
 import { StatController } from "./objects/StatController";
@@ -14,10 +13,10 @@ import { timeSpentStatistic } from "./statistics/timeSpent";
 export function startup() {
   // a container to hold all the statistics data/widgets for easy pausing and resetting
   const statController = new StatController();
-  events.initialize();
-  time.initialize();
 
-  // track how much time has been spent in the game
+  events.initialize();
+
+  // stat for track how much time has been spent in the game
   const timeSpentStat = timeSpentStatistic();
 
   // add the statistics to the controller

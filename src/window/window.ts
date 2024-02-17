@@ -16,10 +16,7 @@ export function initialize(sc: StatController) {
     onOpen: () => (isWindowOpen = true),
     onClose: () => (isWindowOpen = false),
     content: [
-      // legacy time widget, is replicated in the StatController's widgets
-      // getTimeWidget(),
       // spread in the widgets from the StatController
-      // including the new timeSpent widget
       ...sc.widgets,
       getPausedWidget(),
       // pass in the StatController to pass through the reset functions

@@ -11,25 +11,26 @@ export class Statistic<T, U> {
   /** The display name on the widget*/
   statName!: string;
 
-  /**
-   * A function that allows subscribing to updates of the statistic value.
-   * @param updateStat - A callback function that will be called when the statistic value is updated.
-   *                     It takes a single parameter, newValue, which represents the new value of the statistic.
-   */
-  subscriber!: (updateStat: (newValue: T) => void) => void;
-
   /** The store that holds the value of the game stat */
   gameStatStore!: WritableStore<U>;
 
   /** The store that holds the value of the park stat */
   parkStatStore!: WritableStore<U>;
 
+  /** Whether the statistics are paused */
   isPaused = false;
 
   /** The value when resetting the game stat. Should be an empty-ish value,
    * e.g. 0, "", [], etc.
    */
   resetValue!: U;
+
+  /**
+   * The function that allows subscribing to updates of the statistic value.
+   * @param updateStat - A callback function that will be called when the statistic value is updated.
+   *                     It takes a single parameter, newValue, which represents the new value of the statistic.
+   */
+  subscriber!: (updateStat: (newValue: T) => void) => void;
 
   /** The function that accumulates the new value into the existing value */
   accumulator: (newValue: T, existingValues: U) => U;
@@ -54,32 +55,31 @@ export class Statistic<T, U> {
     /** The display name on the widget*/
     title: string;
 
+    /** The value when resetting the game stat. Should be an empty-ish value,
+     * e.g. 0, "", [], etc.
+     */
+    resetValue: U;
     /**
-     * A function that allows subscribing to updates of the statistic value.
+     * The function that allows subscribing to updates of the statistic value.
      * @param updateStat - A callback function that will be called when the statistic value is updated.
      *                     It takes a single parameter, newValue, which represents the new value of the statistic.
      */
     subscriber: (updateStat: (newValue: T) => void) => void;
 
-    /** The value when resetting the game stat. Should be an empty-ish value,
-     * e.g. 0, "", [], etc.
-     */
-    resetValue: U;
+    /** The function that accumulates the new value into the existing value.
+    * Could concatenate by adding, or spreading into a new array, etc.
+    * 
+    * @example 
+    * function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
+        return [...existingRides, newRide];
+    }
+  */
+    accumulator: (newValue: T, oldValue: U) => U;
 
     /** The function that formats the value for display */
     formatDisplay: (value: U) => string;
-
-    /** The function that accumulates the new value into the existing value.
-     * Could concatenate by adding, or spreading into a new array, etc.
-     * 
-     * @example 
-     * function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
-          return [...existingRides, newRide];
-        }
-     */
-    accumulator: (newValue: T, oldValue: U) => U;
   }) {
-    const { key, title, subscriber, resetValue, formatDisplay, accumulator } =
+    const { key, title, resetValue, subscriber, accumulator, formatDisplay } =
       props;
 
     this.statKey = key;
@@ -104,8 +104,6 @@ export class Statistic<T, U> {
     areStatisticsPaused.subscribe((isPaused) => (this.isPaused = isPaused));
 
     // Make sure to load the park stat when the map changes
-    // I'm not actually sure if this is needed;
-    // I think all plugins re-initialize when the map changes
     context.subscribe("map.changed", () => {
       this.loadParkStat();
     });
@@ -124,10 +122,6 @@ export class Statistic<T, U> {
     const parkOldValue = this.parkStatStore.get();
     const newParkStoreValue = this.accumulator(newValue, parkOldValue);
     this.parkStatStore.set(newParkStoreValue);
-  }
-
-  resetGameStat() {
-    this.gameStatStore.set(this.resetValue);
   }
 
   loadParkStat() {

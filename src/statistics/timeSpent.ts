@@ -1,16 +1,16 @@
 import { Statistic } from "../objects/Statistic";
 
-const STATISTIC_KEY = "timePassed";
+const STATISTIC_KEY = "timeSpent";
 const STATISTIC_TITLE = "Time Spent in";
 
-type TimeSpendStat = number;
+type TimeSpentStat = number;
 
 // A tad unwieldy, but we need to create a function that will be called whenever the statistic is updated
 // This function will be called every second, and will add 1 (for one second) to the existing time value
 const subscribeToTimePassing = (
   // Create a callback function inside the main subscription function
   // This callback function will be called in partnership with the accumulator function to update the stat value
-  updatedValueCallback: (addedTime: TimeSpendStat) => void
+  updatedValueCallback: (addedTime: TimeSpentStat) => void
 ) => {
   // The hook in this case is time-based, so we want to call the callback function every second
   context.setInterval(() => {
@@ -22,7 +22,7 @@ const subscribeToTimePassing = (
 // each time the hook is called, we want to add to the existing time value
 // in this case, we know that the newVal will always be 1 since we're putting a static value in the updatedValueCallback
 // so we could replce the newVal with 1
-function accumulateSeconds(newVal: TimeSpendStat, existingVal: TimeSpendStat) {
+function accumulateSeconds(newVal: TimeSpentStat, existingVal: TimeSpentStat) {
   return existingVal + newVal;
 }
 
@@ -41,17 +41,14 @@ export const timeSpentStatistic = () => {
 
   // LEGACY SUPPORT FOR TRACKING TIME IN-GAME
   const legacyGameTimeKey = "openrct2-statistics.time.gameTime";
-  if (
-    // unfortunately there's no way to get rid of a key,
-    // so needing to check if it exists and if it has a value every time
-    context.sharedStorage.get(legacyGameTimeKey) != null
-  ) {
+  if (context.sharedStorage.has(legacyGameTimeKey)) {
     // To prevent a conflict when importing the shared storage, wait a second beforehand
     context.setTimeout(() => {
       let legacyTime = context.sharedStorage.get(legacyGameTimeKey) as number;
       if (legacyTime >= 0) {
         statistic.gameStatStore.set(legacyTime + 1);
         // Prevent legacy value from being imported more than once
+        // Setting to undefined will make the above has() method return false
         context.sharedStorage.set(legacyGameTimeKey, undefined);
       }
     }, 1000);
@@ -61,9 +58,7 @@ export const timeSpentStatistic = () => {
     const legacyParkTimeKey = "openrct2-statistics.time.parkTime";
     if (
       context.mode == "normal" &&
-      // unfortunately there's no way to get rid of a key,
-      // check if the legacy key exists and has a value
-      context.getParkStorage().get(legacyParkTimeKey) != null
+      context.getParkStorage().has(legacyParkTimeKey)
     ) {
       // To prevent a conflict when importing the park storage, wait a second beforehand
       context.setTimeout(() => {
@@ -73,6 +68,7 @@ export const timeSpentStatistic = () => {
         if (legacyTime >= 0) {
           statistic.parkStatStore.set(legacyTime + 1);
           // Prevent legacy value from being imported more than once
+          // Setting to undefined will make the above has() method return false
           context.getParkStorage().set(legacyParkTimeKey, undefined);
         }
       }, 1000);
