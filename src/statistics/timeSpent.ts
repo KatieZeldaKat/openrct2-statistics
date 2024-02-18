@@ -45,12 +45,10 @@ export const timeSpentStatistic = () => {
     // To prevent a conflict when importing the shared storage, wait a second beforehand
     context.setTimeout(() => {
       let legacyTime = context.sharedStorage.get(legacyGameTimeKey) as number;
-      if (legacyTime >= 0) {
-        statistic.gameStatStore.set(legacyTime + 1);
-        // Prevent legacy value from being imported more than once
-        // Setting to undefined will make the above has() method return false
-        context.sharedStorage.set(legacyGameTimeKey, undefined);
-      }
+      statistic.gameStatStore.set(legacyTime + 1);
+      // Prevent legacy value from being imported more than once
+      // Setting to undefined will make the above has() method return false the next time it's called
+      context.sharedStorage.set(legacyGameTimeKey, undefined);
     }, 1000);
   }
   // LEGACY SUPPORT FOR TRACKING TIME IN PARKS
@@ -65,12 +63,10 @@ export const timeSpentStatistic = () => {
         let legacyTime = context
           .getParkStorage()
           .get(legacyParkTimeKey) as number;
-        if (legacyTime >= 0) {
-          statistic.parkStatStore.set(legacyTime + 1);
-          // Prevent legacy value from being imported more than once
-          // Setting to undefined will make the above has() method return false
-          context.getParkStorage().set(legacyParkTimeKey, undefined);
-        }
+        statistic.parkStatStore.set(legacyTime + 1);
+        // Prevent legacy value from being imported more than once
+        // Setting to undefined will make the above has() method return false the next time it's called
+        context.getParkStorage().set(legacyParkTimeKey, undefined);
       }, 1000);
     }
   });
