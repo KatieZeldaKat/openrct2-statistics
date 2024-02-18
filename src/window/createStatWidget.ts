@@ -24,15 +24,15 @@ export function createStatWidget<T>(props: {
    * Function to process the stat value,
    * e.g. to process time in seconds into nice human-readable text,
    * or to take the take the length of an array instead of its values*/
-  processStat: (stat: T) => string;
+  formatDisplay: (stat: T) => string;
 }): WidgetCreator<FlexiblePosition> {
-  const { title, gameStatStore, parkStatStore, processStat } = props;
+  const { title, gameStatStore, parkStatStore, formatDisplay } = props;
 
   return groupbox({
     text: `${title}`,
     content: [
-      getGameStatWidget(gameStatStore, processStat),
-      getParkStatWidget(parkStatStore, processStat),
+      getGameStatWidget(gameStatStore, formatDisplay),
+      getParkStatWidget(parkStatStore, formatDisplay),
     ],
   });
 }

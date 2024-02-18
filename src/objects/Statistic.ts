@@ -44,11 +44,11 @@ export class Statistic<T, U> {
       title: this.statName,
       gameStatStore: this.gameStatStore,
       parkStatStore: this.parkStatStore,
-      processStat: this.formatDisplay,
+      formatDisplay: this.formatDisplay,
     });
   }
 
-  constructor(props: {
+  constructor(
     /** The save/load key */
     key: string;
 
@@ -78,9 +78,7 @@ export class Statistic<T, U> {
 
     /** The function that formats the value for display */
     formatDisplay: (value: U) => string;
-  }) {
-    const { key, title, resetValue, subscriber, accumulator, formatDisplay } =
-      props;
+  ) {
 
     this.statKey = key;
     this.statName = title;
