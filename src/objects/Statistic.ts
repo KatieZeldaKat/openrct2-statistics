@@ -50,21 +50,21 @@ export class Statistic<T, U> {
 
   constructor(
     /** The save/load key */
-    key: string;
+    key: string,
 
     /** The display name on the widget*/
-    title: string;
+    title: string,
 
     /** The value when resetting the game stat. Should be an empty-ish value,
      * e.g. 0, "", [], etc.
      */
-    resetValue: U;
+    resetValue: U,
     /**
      * The function that allows subscribing to updates of the statistic value.
      * @param updateStat - A callback function that will be called when the statistic value is updated.
      *                     It takes a single parameter, newValue, which represents the new value of the statistic.
      */
-    subscriber: (updateStat: (newValue: T) => void) => void;
+    subscriber: (updateStat: (newValue: T) => void) => void,
 
     /** The function that accumulates the new value into the existing value.
     * Could concatenate by adding, or spreading into a new array, etc.
@@ -74,12 +74,11 @@ export class Statistic<T, U> {
         return [...existingRides, newRide];
     }
   */
-    accumulator: (newValue: T, oldValue: U) => U;
+    accumulator: (newValue: T, oldValue: U) => U,
 
     /** The function that formats the value for display */
-    formatDisplay: (value: U) => string;
+    formatDisplay: (value: U) => string
   ) {
-
     this.statKey = key;
     this.statName = title;
     this.resetValue = resetValue;
