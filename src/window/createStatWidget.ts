@@ -13,7 +13,7 @@ import {
 /**
  * Creates a stat widget with the given properties.
  */
-export function createStatWidget<T>(props: {
+export function createStatWidget<T>(params: {
   /** The title of your widget which will display in the box*/
   title: string;
   /** The store with total game stat values*/
@@ -26,7 +26,7 @@ export function createStatWidget<T>(props: {
    * or to take the take the length of an array instead of its values*/
   formatDisplay: (stat: T) => string;
 }): WidgetCreator<FlexiblePosition> {
-  const { title, gameStatStore, parkStatStore, formatDisplay } = props;
+  const { title, gameStatStore, parkStatStore, formatDisplay } = params;
 
   return groupbox({
     text: `${title}`,
