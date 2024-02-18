@@ -4,144 +4,6 @@ Feel free to contribute through issues and/or pull requests. I will try my best 
 
 The instructions below are taken from [Basssiiie's Typescript Template](https://github.com/Basssiiie/OpenRCT2-Simple-Typescript-Template), though the template is slightly modified from the original.
 
-## Adding more statistics
-
-This plugin offers easy extensibility for tracking new statistics. Look through `src/statistics/timeSpent.ts` to see an existing implementation.
-
-### Steps for designing your own statistic widget:
-
-1. Identify the stat you want to track & make sure there's a way to actually do that in the game.
-
-   - For instance, look through the `HookType` and `ActionType` types for ideas of what can be listened for/hooked into. For example, you can listen to just ride creation events by subscribing to `action.execute` and filter the events for those which are `ridecreate`.
-
-2. (optional) Create a type to describe the shape of your statistic you're going to track. This should be a single instance of the stat, not a group or array of stats. If you're tracking the amount of time played, this could be `type TimeSpendStat = number`. If you're doing something more complicated, an object could be useful, e.g.
-
-   ```ts
-   type RideCreatedStat = {
-     rideId: number;
-     rideType: number;
-     rideObject: number;
-   };
-   ```
-
-3. Write a subscription function with a callback that subscribes to the event you're trying to track (a ride being destroyed, a second passing, a piece of scenery being placed), and callback when the event happens. (Note, the calling back happens inside a Statistic object, so you can ignore that part of it.)
-
-   ```ts
-   // A tad unwieldy, but we need to create a function that will be called whenever the statistic is updated
-   // In this case, this function will be called every second,
-   // and will add 1 (for one second) to the existing time value
-   const subscribeToTimePassing = (
-     // Create a callback function inside the main subscription function
-     // This callback function will be called in partnership with the accumulator function to update the stat value
-     updatedValueCallback: (addedTime: TimeSpentStat) => void
-   ) => {
-     // The hook in this case is time-based, so we want to call the callback function every second
-     context.setInterval(() => {
-       // In other widgets, we would probably use the value from this hook, but in this case we're just adding 1
-       updatedValueCallback(1);
-     }, 1000);
-   };
-   ```
-
-4. Write an accumulator function. This will give direction on how to add each new event's data into the existing list. This is where you'll give definition to how your data gets stored when any new event gets added. Here are two examples:
-
-- For a widget tracking rides built:
-  ```ts
-  // function showing how to accumulate the new value into the existing value
-  // in this case, we're just adding the new ride to the list of rides
-  // in other cases, you might add the new value to the existing value
-  // or set the keys/values in an object or map
-  function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
-    return [...existingRides, newRide];
-  }
-  ```
-- For a widget tracking amount of time passed
-  ```ts
-  // each time the hook is called,
-  // we want to add the newAmountOfTimePassed to the existing time value
-  // in practice, newAmountOfTimePassed will always be 1 (for 1 second)
-  function accumulateSecond(
-    newAmountOfTimePassed: TimeSpendStat,
-    existingVal: TimeSpendStat
-  ) {
-    return existingVal + newAmountOfTimePassed;
-  }
-  ```
-
-5. Write a function to define how the data should be processed before it's shown in the widget.
-
-- For a widget tracking rides built
-  ```ts
-  // function that formats the value of the statistic for display
-  // in this case, it's just the number of rides built
-  // but I could see it being reformatted to show the names of the rides built or something else
-  // and displayed in a different widget
-  function formatDisplay(ridesBuilt: RideStat[]): string {
-    const numberOfRides = Object.keys(ridesBuilt).length;
-    return `${numberOfRides}`;
-  }
-  ```
-- For a widget tracking amount of time passed
-
-  ```ts
-  function formatDisplay(totalSeconds: number): string {
-    const SECONDS_IN_MINUTE = 60;
-    const SECONDS_IN_HOUR = 3600;
-
-    let result = "";
-    let hours = Math.floor(totalSeconds / SECONDS_IN_HOUR);
-    let minutes = Math.floor(
-      (totalSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE
-    );
-    let seconds = totalSeconds % SECONDS_IN_MINUTE;
-
-    if (hours > 0) {
-      result += `${hours}h `;
-    }
-    if (hours > 0 || minutes > 0) {
-      result += `${minutes < 10 ? "0" + minutes : minutes}m `;
-    }
-    result += `${seconds < 10 ? "0" + seconds : seconds}s`;
-
-    return result;
-  }
-  ```
-
-6. Write a function to create and return a Statistic object.
-
-   - Note the need for a **reset value**. This should be an empty-ish value, like `0`, `""`, `[]`, or `{}`, depending on how you are accumulating your statistic. The type should match the return value from your accumulator.
-
-   ```ts
-   export const timeSpentStatistic = () => {
-     const key = STATISTIC_KEY;
-     const title = STATISTIC_TITLE;
-     return new Statistic({
-       key,
-       title,
-       // The reset value when resetting the game stat.
-       // Should be an empty-ish value, e.g. 0, "", [], {}, etc.
-       // that matches the return type of your accumulator function
-       resetValue: 0,
-       formatDisplay,
-       subscriber: subscribeToTimePassing,
-       accumulator: accumulateSeconds,
-     });
-   };
-   ```
-
-7. Finally, open `./src/startup.ts` and add your new statistic into the file:
-
-   - Call your exported function from #7
-   - Add it into the statController so a widget will be created
-
-   ```ts
-   // track how much time has been spent in the game
-   const timeSpentStat = timeSpentStatistic();
-
-   // add the statistics to the controller
-   statController.add(timeSpentStat);
-   ```
-
 ## How to start
 
 1. Install dependencies using `npm`
@@ -163,6 +25,81 @@ The following libraries and tools are used for development:
 - **TypeScript** is a expansion language to JavaScript that adds type checking when you are writing the code. It allows you to specify rules for how objects and values look like, so TypeScript can report back if your code follows these rules (instead of crashes or errors in-game).
 - **Rollup** bundles all source code, runs it through some plugins like TypeScript, and then outputs a single JavaScript plugin file.
 - **Nodemon** is the program that can watch a folder for changes and then trigger a specified action. It is used by `npm start` to watch the `./src/` folder and triggers `npm run build:dev` if any changes occur.
+
+---
+
+## Adding more statistics
+
+This plugin offers easy extensibility for tracking new statistics. Look through `src/statistics/timeSpent.ts` to see an existing implementation.
+
+### Steps for designing your own statistic widget:
+
+1. Identify the stat you want to track & make sure there's a way to actually do that in the game.
+
+   - For instance, look through the `HookType` and `ActionType` types for ideas of what can be listened for/hooked into. For example, you can listen to just ride creation events by subscribing to `action.execute` and filter the events for those which are `ridecreate`.
+
+2. (optional) Create a type to describe the shape of your statistic you're going to track. This should be a single instance of the stat, not a group or array of stats. If you're tracking the amount of time played, this could be `type TimeSpentStat = number`. If you're doing something more complicated, an object could be useful, e.g.
+
+   ```ts
+   type RideCreatedStat = {
+     rideId: number;
+     rideType: number;
+     rideObject: number;
+   };
+   ```
+
+3. Write a subscription function with a callback that subscribes to the event you're trying to track (a ride being destroyed, a second passing, a piece of scenery being placed, etc.), that calls back when the event happens. (Note, the calling back happens inside a Statistic object, so you can ignore that part of it.)
+
+   ```ts
+   const subscribeToTimePassing = (
+     updatedValueCallback: (addedTime: TimeSpentStat) => void
+   ) => {
+     context.setInterval(() => {
+       updatedValueCallback(1);
+     }, 1000);
+   };
+   ```
+
+4. Write an accumulator function. This will give direction on how to add each new event's data into the existing list. This is where you'll give definition to how your data gets stored when any new event gets added. Here are two examples:
+
+   - For a widget tracking rides built:
+     ```ts
+     // adding the new ride to the list of rides
+     function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
+       return [...existingRides, newRide];
+     }
+     ```
+   - For a widget tracking amount of time passed
+     ```ts
+     // each time the hook is called,
+     // we want to add the newAmountOfTimePassed to the existing time value
+     // in practice, newAmountOfTimePassed will always be 1 (for 1 second)
+     function accumulateSecond(
+       newAmountOfTimePassed: TimeSpendStat,
+       existingVal: TimeSpendStat
+     ) {
+       return existingVal + newAmountOfTimePassed;
+     }
+
+5. Write a function to define how the data should be processed before it's shown in the widget.
+
+6. Write a function to create and return a Statistic object.
+
+   - Note the need for a **reset value**. This should be an empty-ish value, like `0`, `""`, `[]`, or `{}`, depending on how you are accumulating your statistic. The type should match the return value from your accumulator.
+
+7. Open `./src/startup.ts` and add your new statistic into the file:
+
+   - Call your exported function from #7
+   - Add it into the statController so a widget will be created
+
+   ```ts
+   // track how much time has been spent in the game
+   const timeSpentStat = timeSpentStatistic();
+
+   // add the statistics to the controller
+   statController.add(timeSpentStat);
+   ```
+
 
 ---
 
