@@ -86,8 +86,8 @@ export class Statistic<T, U> {
     this.statName = title;
     this.resetValue = resetValue;
     this.subscriber = subscriber;
-    this.formatDisplay = formatDisplay;
     this.accumulator = accumulator;
+    this.formatDisplay = formatDisplay;
 
     // Copilot says to bind the updateStat function to the class
     // so that it can be passed as a callback
