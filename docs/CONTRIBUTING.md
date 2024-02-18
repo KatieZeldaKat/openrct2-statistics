@@ -80,6 +80,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
      ) {
        return existingVal + newAmountOfTimePassed;
      }
+     ```
 
 5. Write a function to define how the data should be processed before it's shown in the widget.
 
@@ -89,7 +90,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
 
 7. Open `./src/startup.ts` and add your new statistic into the file:
 
-   - Call your exported function from #7
+   - Call your exported function from #6
    - Add it into the statController so a widget will be created
 
    ```ts
@@ -99,7 +100,6 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
    // add the statistics to the controller
    statController.add(timeSpentStat);
    ```
-
 
 ---
 
