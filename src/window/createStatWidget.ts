@@ -12,12 +12,6 @@ import {
 
 /**
  * Creates a stat widget with the given properties.
- *
- * @param {string} props.title - The title of the stat widget.
- * @param {Store<T>} props.gameStatStore - The statistic store with values for the entire game.
- * @param {Store<T>} props.parkStatStore - The park stat store with values for the current park.
- * @param {(stat: T) => string} [props.processStat] - Optional function to process the stat value for displaying it more clearly.
- * @returns {WidgetCreator<FlexiblePosition>} The created stat widget.
  */
 export function createStatWidget<T>(props: {
   /** The title of your widget which will display in the box*/
