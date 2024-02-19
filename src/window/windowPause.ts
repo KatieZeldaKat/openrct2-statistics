@@ -6,9 +6,9 @@ import {
   groupbox,
   store,
   horizontal,
-  button,
   label,
   compute,
+  toggle,
 } from "openrct2-flexui";
 
 const STATS_PAUSED_KEY = `${info.name}.paused`;
@@ -31,13 +31,14 @@ export function getPausedWidget(): WidgetCreator<FlexiblePosition> {
     text: "Pause Statistics",
     content: [
       horizontal([
-        button({
+        toggle({
+          width: "25px",
+          height: "25px",
           image: compute(areStatisticsPaused, (paused) =>
             getButtonIcon(paused)
           ),
-          width: "25px",
-          height: "25px",
-          onClick: () => areStatisticsPaused.set(!areStatisticsPaused.get()),
+          isPressed: compute(areStatisticsPaused, (paused) => paused),
+          onChange: (isPressed) => areStatisticsPaused.set(isPressed),
         }),
         label({
           text: compute(areStatisticsPaused, (paused) => getPausedText(paused)),

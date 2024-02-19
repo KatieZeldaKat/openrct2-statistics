@@ -17,9 +17,6 @@ export class Statistic<T, U> {
   /** The store that holds the value of the park stat */
   parkStatStore!: WritableStore<U>;
 
-  /** Whether the statistics are paused */
-  isPaused = false;
-
   /** The value when resetting the game stat. Should be an empty-ish value,
    * e.g. 0, "", [], etc.
    */
@@ -97,9 +94,6 @@ export class Statistic<T, U> {
     this.initializeGameStatStore();
     this.initializeParkStatStore();
 
-    // Subscribe to the pause event
-    areStatisticsPaused.subscribe((isPaused) => (this.isPaused = isPaused));
-
     // Make sure to load the park stat when the map changes
     context.subscribe("map.changed", () => {
       this.loadParkStat();
@@ -107,7 +101,7 @@ export class Statistic<T, U> {
   }
 
   updateStat(newValue: T) {
-    if (this.isPaused) {
+    if (areStatisticsPaused.get()) {
       return;
     }
 
