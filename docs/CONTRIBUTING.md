@@ -12,8 +12,9 @@ The instructions below are taken from [Basssiiie's Typescript Template](https://
 4. Use `cd` to change your current directory to the root folder of this project.
 5. Run `npm ci` to install the project's dependencies.
 6. Use the `openrct2.d.ts` TypeScript API declaration file for v0.4.7 and copy it to `./lib/` folder.
-   - This file can usually be found in the [OpenRCT2 installation directory](#openrct2-installation-directory).
-   - Alternatively you can [download it from here](https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/v0.4.7/distribution/openrct2.d.ts).
+
+- This file can usually be found in the [OpenRCT2 installation directory](#openrct2-installation-directory).
+- Alternatively you can [download it from here](https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/v0.4.7/distribution/openrct2.d.ts).
 
 ## Dependencies
 
@@ -24,6 +25,81 @@ The following libraries and tools are used for development:
 - **TypeScript** is a expansion language to JavaScript that adds type checking when you are writing the code. It allows you to specify rules for how objects and values look like, so TypeScript can report back if your code follows these rules (instead of crashes or errors in-game).
 - **Rollup** bundles all source code, runs it through some plugins like TypeScript, and then outputs a single JavaScript plugin file.
 - **Nodemon** is the program that can watch a folder for changes and then trigger a specified action. It is used by `npm start` to watch the `./src/` folder and triggers `npm run build:dev` if any changes occur.
+
+---
+
+## Adding more statistics
+
+This plugin offers easy extensibility for tracking new statistics. Look through `src/statistics/timeSpent.ts` to see an existing implementation.
+
+### Steps for designing your own statistic widget:
+
+1. Identify the stat you want to track & make sure there's a way to actually do that in the game.
+
+   - For instance, look through the `HookType` and `ActionType` types for ideas of what can be listened for/hooked into. For example, you can listen to just ride creation events by subscribing to `action.execute` and filter the events for those which are `ridecreate`.
+
+2. (optional) Create a type to describe the shape of your statistic you're going to track. This should be a single instance of the stat, not a group or array of stats. If you're tracking the amount of time played, this could be `type TimeSpentStat = number`. If you're doing something more complicated, an object could be useful, e.g.
+
+   ```ts
+   type RideCreatedStat = {
+     rideId: number;
+     rideType: number;
+     rideObject: number;
+   };
+   ```
+
+3. Write a subscription function with a callback that subscribes to the event you're trying to track (a ride being destroyed, a second passing, a piece of scenery being placed, etc.), that calls back when the event happens. (Note, the calling back happens inside a Statistic object, so you can ignore that part of it.)
+
+   ```ts
+   const subscribeToTimePassing = (
+     updatedValueCallback: (addedTime: TimeSpentStat) => void
+   ) => {
+     context.setInterval(() => {
+       updatedValueCallback(1);
+     }, 1000);
+   };
+   ```
+
+4. Write an accumulator function. This will give direction on how to add each new event's data into the existing list. This is where you'll give definition to how your data gets stored when any new event gets added. Here are two examples:
+
+   - For a widget tracking rides built:
+     ```ts
+     // adding the new ride to the list of rides
+     function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
+       return [...existingRides, newRide];
+     }
+     ```
+   - For a widget tracking amount of time passed
+     ```ts
+     // each time the hook is called,
+     // we want to add the newAmountOfTimePassed to the existing time value
+     // in practice, newAmountOfTimePassed will always be 1 (for 1 second)
+     function accumulateSecond(
+       newAmountOfTimePassed: TimeSpendStat,
+       existingVal: TimeSpendStat
+     ) {
+       return existingVal + newAmountOfTimePassed;
+     }
+     ```
+
+5. Write a function to define how the data should be processed before it's shown in the widget.
+
+6. Write a function to create and return a Statistic object.
+
+   - Note the need for a **reset value**. This should be an empty-ish value, like `0`, `""`, `[]`, or `{}`, depending on how you are accumulating your statistic. The type should match the return value from your accumulator.
+
+7. Open `./src/startup.ts` and add your new statistic into the file:
+
+   - Call your exported function from #6
+   - Add it into the statController so a widget will be created
+
+   ```ts
+   // track how much time has been spent in the game
+   const timeSpentStat = timeSpentStatistic();
+
+   // add the statistics to the controller
+   statController.add(timeSpentStat);
+   ```
 
 ---
 
@@ -59,7 +135,8 @@ When your plugin is not loading properly, it may be useful to be able to read th
 
 1. Navigate to the folder where [OpenRCT2 is installed](#openrct2-installation-directory).
 2. Launch the `openrct2.com` file located there (the MS-DOS application).
-	- If file extensions are hidden, make sure to [enable them](https://support.microsoft.com/en-us/windows/common-file-name-extensions-in-windows-da4a4430-8e76-89c5-59f7-1cdbbc75cb01).
+
+- If file extensions are hidden, make sure to [enable them](https://support.microsoft.com/en-us/windows/common-file-name-extensions-in-windows-da4a4430-8e76-89c5-59f7-1cdbbc75cb01).
 
 ### MacOS
 
