@@ -11,23 +11,23 @@ import { timeSpentStatistic } from "./statistics/timeSpent";
  * To add new widgets, you can create a new Statistic object and add it to the StatController.
  */
 export function startup() {
-  // a container to hold all the statistics data/widgets for easy pausing and resetting
-  const statController = new StatController();
+    // Events for ease of tracking game state
+    events.initialize();
 
-  events.initialize();
+    // Stat to track how much time has been spent in the game
+    const timeSpentStat = timeSpentStatistic();
 
-  // stat for track how much time has been spent in the game
-  const timeSpentStat = timeSpentStatistic();
+    // prettier-ignore
+    // Setup the container for statistics to track
+    const statController = new StatController()
+        .add(timeSpentStat);
 
-  // add the statistics to the controller
-  statController.add(timeSpentStat);
+    if (typeof ui !== "undefined") {
+        windowWarning.initialize();
+        window.initialize(statController);
 
-  if (typeof ui !== "undefined") {
-    window.initialize(statController);
-    windowWarning.initialize();
-
-    const menuItemName = "OpenRCT2 Statistics";
-    ui.registerMenuItem(menuItemName, window.openWindow);
-    ui.registerToolboxMenuItem(menuItemName, window.openWindow);
-  }
+        const menuItemName = "OpenRCT2 Statistics";
+        ui.registerMenuItem(menuItemName, window.openWindow);
+        ui.registerToolboxMenuItem(menuItemName, window.openWindow);
+    }
 }
