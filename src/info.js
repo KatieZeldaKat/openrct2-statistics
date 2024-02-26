@@ -1,12 +1,13 @@
 export const name = "openrct2-statistics";
-export const authors = [
-  "Katherine Norton (KatieZeldaKat)",
-  "Smitty Penman (ltsSmitty)",
-];
-export const license = "MIT";
-
 export const version = "1.1.0";
 export const type = "intransient";
+export const license = "MIT";
+
+// prettier-ignore
+export const authors = [
+    "Katherine Norton (KatieZeldaKat)",
+    "Smitty Penman (ltsSmitty)",
+];
 
 /**
  * The following field determines which OpenRCT2 API version to use. It's best to always target
