@@ -100,7 +100,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
 
         // add the statistics to the controller
         statController.add(timeSpentStat);
-    ```
+        ```
 
 ---
 
