@@ -3,6 +3,7 @@ import * as window from "./window/window";
 import * as windowWarning from "./window/windowWarning";
 import { StatController } from "./objects/StatController";
 import { timeSpentStatistic } from "./statistics/timeSpent";
+import { guestsDrownedStatistic } from "./statistics/guestsDrowned";
 
 /**
  * The entry point for this plugin. Should initialize any tracking of statistics, and if the ui
@@ -14,13 +15,10 @@ export function startup() {
     // Events for ease of tracking game state
     events.initialize();
 
-    // Stat to track how much time has been spent in the game
-    const timeSpentStat = timeSpentStatistic();
-
-    // prettier-ignore
-    // Setup the container for statistics to track
+    // Setup the statistics to track and their container
     const statController = new StatController()
-        .add(timeSpentStat);
+        .add(timeSpentStatistic())
+        .add(guestsDrownedStatistic());
 
     if (typeof ui !== "undefined") {
         windowWarning.initialize();
