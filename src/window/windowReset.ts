@@ -13,6 +13,8 @@ import {
 import { StatController } from "../objects/StatController";
 
 export function getResetWidget(sc: StatController): WidgetCreator<FlexiblePosition> {
+    const image = context.apiVersion < 65 ? 5165 : context.getIcon("reload");
+
     const parkNameFormat = (name: string) => `Reset Statistics for "${name}"`;
     let parkName = store(parkNameFormat(events.parkName.get()));
     events.parkName.subscribe((newName) => parkName.set(parkNameFormat(newName)));
@@ -27,7 +29,7 @@ export function getResetWidget(sc: StatController): WidgetCreator<FlexiblePositi
         content: [
             horizontal([
                 button({
-                    image: "reload",
+                    image: image,
                     width: "25px",
                     height: "25px",
                     onClick: () => resetGenericStatistics(sc),
@@ -36,7 +38,7 @@ export function getResetWidget(sc: StatController): WidgetCreator<FlexiblePositi
             ]),
             horizontal([
                 button({
-                    image: "reload",
+                    image: image,
                     width: "25px",
                     height: "25px",
                     visibility: isParkWidgetVisible,

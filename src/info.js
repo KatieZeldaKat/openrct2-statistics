@@ -1,5 +1,5 @@
 export const name = "openrct2-statistics";
-export const version = "1.1.0";
+export const version = "1.1.1";
 export const type = "intransient";
 export const license = "MIT";
 
