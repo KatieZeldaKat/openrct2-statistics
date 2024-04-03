@@ -35,7 +35,7 @@ export const timeSpentStatistic = () => {
         key,
         title,
         resetValue,
-        112,
+        70,
         subscribeToTimePassing,
         accumulateSeconds,
         formatDisplay,
