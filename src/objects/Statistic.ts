@@ -20,6 +20,9 @@ export class Statistic<T, U> {
     /** The value when resetting the stat. */
     resetValue!: U;
 
+    /** The required API version for the stat to be supported. */
+    minimumApiVersion!: number;
+
     /** The function that allows subscribing to updates of the statistic value. */
     subscriber!: (updateStat: (newValue: T) => void) => void;
 
@@ -49,6 +52,9 @@ export class Statistic<T, U> {
         /** The value when resetting the stat; should be an empty-ish value (0, "", [], etc.) */
         resetValue: U,
 
+        /** The required API version for the stat to be supported. */
+        minimumApiVersion: number,
+
         /**
          * The function that allows subscribing to updates of the statistic value.
          * @param updateStat - A callback function to be called when the statistic value is updated.
@@ -73,6 +79,7 @@ export class Statistic<T, U> {
         this.statKey = key;
         this.statName = title;
         this.resetValue = resetValue;
+        this.minimumApiVersion = minimumApiVersion;
         this.subscriber = subscriber;
         this.accumulator = accumulator;
         this.formatDisplay = formatDisplay;

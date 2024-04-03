@@ -1,4 +1,5 @@
 import { Statistic } from "./Statistic";
+import { UnsupportedStatistic } from "./UnsupportedStatistic";
 
 /**
  * Represents a controller for managing statistics.
@@ -19,7 +20,14 @@ export class StatController {
      * @returns The updated StatController instance.
      */
     add(stat: Statistic<any, any>) {
-        this.statistics.push(stat);
+        // If the statistic requires api methods which aren't available
+        // on the user's OpenRCT3 version,
+        // replace it with an unsupported statistic widget.
+        if (context.apiVersion < stat.minimumApiVersion) {
+            this.statistics.push(new UnsupportedStatistic(stat));
+        } else {
+            this.statistics.push(stat);
+        }
         return this;
     }
 
