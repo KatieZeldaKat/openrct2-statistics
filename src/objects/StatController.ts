@@ -21,7 +21,7 @@ export class StatController {
      */
     add(stat: Statistic<any, any>) {
         // If the statistic requires api methods which aren't available
-        // on the user's OpenRCT3 version,
+        // on the user's OpenRCT2 version,
         // replace it with an unsupported statistic widget.
         if (context.apiVersion < stat.minimumApiVersion) {
             this.statistics.push(new UnsupportedStatistic(stat));
