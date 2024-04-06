@@ -1,4 +1,5 @@
 import { WidgetCreator, FlexiblePosition, groupbox, label, vertical } from "openrct2-flexui";
+import { getGameVersionFromApiVersion } from "../helpers/apiToGameReleaseVersionMap";
 
 /**
  * Creates a stat widget with the given properties.
@@ -10,20 +11,20 @@ export function createUnsupportedStatWidget(params: {
     minimumApiVersion: number;
 }): WidgetCreator<FlexiblePosition> {
     const { title, minimumApiVersion } = params;
+    const gameVersion = getGameVersionFromApiVersion(minimumApiVersion);
 
     return groupbox({
         text: title,
-        height: 100,
         content: [
             vertical({
                 content: [
-                    label({ text: "-+- Unable to calculate this statistic. -+-" }),
+                    label({ text: "-+- Unable to calculate statistic. -+-" }),
                     label({
-                        text: `This stat requires OpenRCT API {RED}version ${minimumApiVersion}\n{WHITE}or higher.`,
+                        text: `This stat requires OpenRCT {RED}version ${gameVersion}\n{WHITE}or higher.`,
                     }),
                     label({
                         padding: { top: 10 },
-                        text: `Please update to a newer version \n(current version ${context.apiVersion}).`,
+                        text: `Update to a newer version of the game.`,
                     }),
                 ],
             }),
