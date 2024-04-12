@@ -1,4 +1,4 @@
-import { Statistic } from "../objects/Statistic";
+import { createStatistic } from "../objects/Statistic";
 
 const STATISTIC_KEY = "timeSpent";
 const STATISTIC_TITLE = "Time Spent in";
@@ -31,7 +31,7 @@ export const timeSpentStatistic = () => {
     const title = STATISTIC_TITLE;
     const resetValue = 0;
 
-    const statistic = new Statistic(
+    const statistic = createStatistic(
         key,
         title,
         resetValue,

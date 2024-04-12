@@ -3,6 +3,7 @@ import * as info from "../info.js";
 import { createStatWidget } from "../window/createStatWidget";
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
+import { UnsupportedStatistic } from "./UnsupportedStatistic.js";
 
 export class Statistic<T, U> {
     /** The save/load key. */
@@ -83,15 +84,12 @@ export class Statistic<T, U> {
         this.subscriber = subscriber;
         this.accumulator = accumulator;
         this.formatDisplay = formatDisplay;
-
-        // Copilot says to bind the updateStat function to the class
-        // so that it can be passed as a callback
-        this.subscriber(this.updateStat.bind(this));
-
-        this.initialize();
     }
 
     initialize() {
+        // Attach subscriber to the stat updates
+        this.subscriber(this.updateStat.bind(this));
+
         this.initializeGameStatStore();
         this.initializeParkStatStore();
 
@@ -152,5 +150,21 @@ export class Statistic<T, U> {
                 context.getParkStorage().set(parkStatKey, newValue);
             }
         });
+    }
+}
+
+export function createStatistic<T, U>(
+    ...params: ConstructorParameters<typeof Statistic<T, U>>
+) {
+    // If the statistic requires api methods which aren't available
+    // on the user's OpenRCT2 version,
+    // replace it with an unsupported statistic widget.
+    const MIN_API_VERSION_ARG_INDEX = 3;
+    if (context.apiVersion < params[MIN_API_VERSION_ARG_INDEX]) {
+        return new UnsupportedStatistic(...params);
+    } else {
+        const stat = new Statistic(...params);
+        stat.initialize();
+        return stat;
     }
 }

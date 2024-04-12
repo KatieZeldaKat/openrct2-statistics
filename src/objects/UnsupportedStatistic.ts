@@ -1,17 +1,9 @@
 import { createUnsupportedStatWidget } from "../window/createUnsupportedStatWidget";
 import { Statistic } from "./Statistic";
 
-export class UnsupportedStatistic extends Statistic<any, any> {
-    constructor(statistic: Statistic<any, any>) {
-        super(
-            statistic.statKey,
-            statistic.statName,
-            statistic.resetValue,
-            statistic.minimumApiVersion,
-            () => {},
-            () => {},
-            () => "",
-        );
+export class UnsupportedStatistic<T, U> extends Statistic<T, U> {
+    constructor(...statisticParams: ConstructorParameters<typeof Statistic<T, U>>) {
+        super(...statisticParams);
     }
 
     override get widget() {
