@@ -1,4 +1,4 @@
-import { createStatistic } from "../objects/Statistic";
+import { createStatistic } from "../objects/createStatistic";
 
 const STATISTIC_KEY = "timeSpent";
 const STATISTIC_TITLE = "Time Spent in";
