@@ -18,18 +18,13 @@ export function createUnsupportedStatWidget(params: {
     return groupbox({
         text: title,
         content: [
-            vertical({
-                content: [
-                    label({ text: "-+- Unable to calculate statistic. -+-" }),
-                    label({
-                        text: versionText,
-                    }),
-                    label({
-                        padding: { top: 10 },
-                        text: `Update to a newer version of the game.`,
-                    }),
-                ],
-            }),
+            vertical([
+                label({ text: "-+- Unable to calculate statistic. -+-" }),
+                label({
+                    text: versionText,
+                    padding: { bottom: 10 },
+                }),
+            ]),
         ],
     });
 }
