@@ -1,6 +1,7 @@
 // @ts-ignore
 import * as info from "../info.js";
 import { createStatWidget } from "../window/createStatWidget";
+import { createUnsupportedStatWidget } from "../window/createUnsupportedStatWidget.js";
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
 
@@ -42,6 +43,9 @@ export class Statistic<T, U> {
         });
     }
 
+    /**
+     * Don't use this constructor directly; use `create` instead.
+     */
     constructor(
         /** The save/load key. */
         key: string,
@@ -83,6 +87,22 @@ export class Statistic<T, U> {
         this.subscriber = subscriber;
         this.accumulator = accumulator;
         this.formatDisplay = formatDisplay;
+    }
+
+    /**
+     * Use to create a new statistic instead of the constructor.
+     * Handles checking if the API version is supported and initializes the stat.
+     */
+    static create<T, U>(...params: ConstructorParameters<typeof Statistic<T, U>>) {
+        const MIN_API_VERSION_ARG_INDEX = 3;
+        const minApiVersion = params[MIN_API_VERSION_ARG_INDEX];
+        if (context.apiVersion < minApiVersion) {
+            return new UnsupportedStatistic(...params);
+        } else {
+            const stat = new Statistic(...params);
+            stat.initialize();
+            return stat;
+        }
     }
 
     initialize() {
@@ -148,6 +168,23 @@ export class Statistic<T, U> {
             if (context.mode == "normal") {
                 context.getParkStorage().set(parkStatKey, newValue);
             }
+        });
+    }
+}
+
+/**
+ * A placeholder for a statistic that is not supported by the player's current version of OpenRCT2.
+ * Displays a message in the widget stating the required version.
+ */
+export class UnsupportedStatistic<T, U> extends Statistic<T, U> {
+    constructor(...statisticParams: ConstructorParameters<typeof Statistic<T, U>>) {
+        super(...statisticParams);
+    }
+
+    override get widget() {
+        return createUnsupportedStatWidget({
+            title: this.statName,
+            minimumApiVersion: this.minimumApiVersion,
         });
     }
 }

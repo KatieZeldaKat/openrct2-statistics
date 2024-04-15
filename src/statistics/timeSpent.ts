@@ -1,4 +1,4 @@
-import { createStatistic } from "../objects/createStatistic";
+import { Statistic } from "../objects/Statistic";
 
 const STATISTIC_KEY = "timeSpent";
 const STATISTIC_TITLE = "Time Spent in";
@@ -32,7 +32,7 @@ export const timeSpentStatistic = () => {
     const resetValue = 0;
     const minApiVersion = 0; // This statistic is supported in all versions
 
-    const statistic = createStatistic(
+    const statistic = Statistic.create(
         key,
         title,
         resetValue,
