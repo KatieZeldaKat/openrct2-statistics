@@ -30,12 +30,13 @@ export const timeSpentStatistic = () => {
     const key = STATISTIC_KEY;
     const title = STATISTIC_TITLE;
     const resetValue = 0;
+    const minApiVersion = 0; // This statistic is supported in all versions
 
     const statistic = createStatistic(
         key,
         title,
         resetValue,
-        70,
+        minApiVersion,
         subscribeToTimePassing,
         accumulateSeconds,
         formatDisplay,
