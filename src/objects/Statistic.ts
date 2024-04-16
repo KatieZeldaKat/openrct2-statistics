@@ -1,7 +1,6 @@
 // @ts-ignore
 import * as info from "../info.js";
-import { createStatWidget } from "../window/createStatWidget";
-import { createUnsupportedStatWidget } from "../window/createUnsupportedStatWidget.js";
+import { createStatWidget, createUnsupportedStatWidget } from "../window/createWidget.js";
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
 
