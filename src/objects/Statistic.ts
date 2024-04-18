@@ -45,25 +45,25 @@ export class Statistic<T, U> {
     /**
      * Don't use this constructor directly; use `create` instead.
      */
-    constructor(
+    constructor(params: {
         /** The save/load key. */
-        key: string,
+        key: string;
 
         /** The display name on the widget. */
-        title: string,
+        title: string;
 
         /** The value when resetting the stat; should be an empty-ish value (0, "", [], etc.) */
-        resetValue: U,
+        resetValue: U;
 
         /** The required API version for the stat to be supported. */
-        minimumApiVersion: number,
+        minimumApiVersion: number;
 
         /**
          * The function that allows subscribing to updates of the statistic value.
          * @param updateStat - A callback function to be called when the statistic value is updated.
          *                     It takes a single parameter: the new value of the statistic.
          */
-        subscriber: (updateStat: (newValue: T) => void) => void,
+        subscriber: (updateStat: (newValue: T) => void) => void;
 
         /**
          * The function that accumulates the new value into the existing value.
@@ -74,31 +74,29 @@ export class Statistic<T, U> {
          *   return [...existingRides, newRide];
          * }
          */
-        accumulator: (newValue: T, oldValue: U) => U,
+        accumulator: (newValue: T, oldValue: U) => U;
 
         /** The function that formats the value for display. */
-        formatDisplay: (value: U) => string,
-    ) {
-        this.statKey = key;
-        this.statName = title;
-        this.resetValue = resetValue;
-        this.minimumApiVersion = minimumApiVersion;
-        this.subscriber = subscriber;
-        this.accumulator = accumulator;
-        this.formatDisplay = formatDisplay;
+        formatDisplay: (value: U) => string;
+    }) {
+        this.statKey = params.key;
+        this.statName = params.title;
+        this.resetValue = params.resetValue;
+        this.minimumApiVersion = params.minimumApiVersion;
+        this.subscriber = params.subscriber;
+        this.accumulator = params.accumulator;
+        this.formatDisplay = params.formatDisplay;
     }
 
     /**
      * Use to create a new statistic instead of the constructor.
      * Handles checking if the API version is supported and initializes the stat.
      */
-    static create<T, U>(...params: ConstructorParameters<typeof Statistic<T, U>>) {
-        const MIN_API_VERSION_ARG_INDEX = 3;
-        const minApiVersion = params[MIN_API_VERSION_ARG_INDEX];
-        if (context.apiVersion < minApiVersion) {
-            return new UnsupportedStatistic(...params);
+    static create<T, U>(params: ConstructorParameters<typeof Statistic<T, U>>[0]) {
+        if (context.apiVersion < params.minimumApiVersion) {
+            return new UnsupportedStatistic(params);
         } else {
-            const stat = new Statistic(...params);
+            const stat = new Statistic(params);
             stat.initialize();
             return stat;
         }
@@ -176,8 +174,8 @@ export class Statistic<T, U> {
  * Displays a message in the widget stating the required version.
  */
 export class UnsupportedStatistic<T, U> extends Statistic<T, U> {
-    constructor(...statisticParams: ConstructorParameters<typeof Statistic<T, U>>) {
-        super(...statisticParams);
+    constructor(statisticParams: ConstructorParameters<typeof Statistic<T, U>>[0]) {
+        super(statisticParams);
     }
 
     override get widget() {
