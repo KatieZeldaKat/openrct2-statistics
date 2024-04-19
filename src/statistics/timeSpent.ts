@@ -33,8 +33,8 @@ export const timeSpentStatistic = () => {
     const minApiVersion = 0; // This statistic is supported in all versions
 
     const statistic = Statistic.create({
-        key,
-        title,
+        statKey: key,
+        statName: title,
         resetValue,
         minimumApiVersion: minApiVersion,
         subscriber: subscribeToTimePassing,

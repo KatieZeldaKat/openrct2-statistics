@@ -4,32 +4,46 @@ import { createStatWidget, createUnsupportedStatWidget } from "../window/createW
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
 
-export class Statistic<T, U> {
+interface BaseStatistic<T, U> {
     /** The save/load key. */
-    statKey!: string;
+    statKey: string;
 
     /** The display name on the widget. */
-    statName!: string;
-
-    /** The store that holds the value of the game stat. */
-    gameStatStore!: WritableStore<U>;
-
-    /** The store that holds the value of the park stat. */
-    parkStatStore!: WritableStore<U>;
+    statName: string;
 
     /** The value when resetting the stat. */
-    resetValue!: U;
+    resetValue: U;
 
-    /** The required API version for the stat to be supported. */
-    minimumApiVersion!: number;
+    /**
+     * The required API version for the stat to be supported.
+     * If the player's version is lower than this, the stat will not be supported.
+     * Compare to {@link PluginMetadata.minApiVersion}, specifically for this statistic.
+     * If the statistic will run on any version of OpenRCT2, set this to `0`.
+     */
+    minimumApiVersion: number;
 
     /** The function that allows subscribing to updates of the statistic value. */
-    subscriber!: (updateStat: (newValue: T) => void) => void;
+    subscriber: (updateStat: (newValue: T) => void) => void;
 
     /** The function that accumulates the new value into the existing value. */
     accumulator: (newValue: T, existingValues: U) => U;
 
     /** The function that formats the value for display. */
+    formatDisplay: (value: U) => string;
+}
+
+export class Statistic<T, U> implements BaseStatistic<T, U> {
+    statKey: string;
+    statName: string;
+
+    gameStatStore!: WritableStore<U>;
+    parkStatStore!: WritableStore<U>;
+
+    resetValue: U;
+    minimumApiVersion: number;
+
+    subscriber: (updateStat: (newValue: T) => void) => void;
+    accumulator: (newValue: T, existingValues: U) => U;
     formatDisplay!: (value: U) => string;
 
     /** The widget that displays the stat. */
@@ -45,42 +59,9 @@ export class Statistic<T, U> {
     /**
      * Don't use this constructor directly; use `create` instead.
      */
-    constructor(params: {
-        /** The save/load key. */
-        key: string;
-
-        /** The display name on the widget. */
-        title: string;
-
-        /** The value when resetting the stat; should be an empty-ish value (0, "", [], etc.) */
-        resetValue: U;
-
-        /** The required API version for the stat to be supported. */
-        minimumApiVersion: number;
-
-        /**
-         * The function that allows subscribing to updates of the statistic value.
-         * @param updateStat - A callback function to be called when the statistic value is updated.
-         *                     It takes a single parameter: the new value of the statistic.
-         */
-        subscriber: (updateStat: (newValue: T) => void) => void;
-
-        /**
-         * The function that accumulates the new value into the existing value.
-         * Could concatenate by adding, spreading into a new array, etc.
-         *
-         * @example
-         * function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
-         *   return [...existingRides, newRide];
-         * }
-         */
-        accumulator: (newValue: T, oldValue: U) => U;
-
-        /** The function that formats the value for display. */
-        formatDisplay: (value: U) => string;
-    }) {
-        this.statKey = params.key;
-        this.statName = params.title;
+    constructor(params: BaseStatistic<T, U>) {
+        this.statKey = params.statKey;
+        this.statName = params.statName;
         this.resetValue = params.resetValue;
         this.minimumApiVersion = params.minimumApiVersion;
         this.subscriber = params.subscriber;
@@ -92,7 +73,7 @@ export class Statistic<T, U> {
      * Use to create a new statistic instead of the constructor.
      * Handles checking if the API version is supported and initializes the stat.
      */
-    static create<T, U>(params: ConstructorParameters<typeof Statistic<T, U>>[0]) {
+    static create<T, U>(params: BaseStatistic<T, U>) {
         if (context.apiVersion < params.minimumApiVersion) {
             return new UnsupportedStatistic(params);
         } else {
@@ -174,7 +155,7 @@ export class Statistic<T, U> {
  * Displays a message in the widget stating the required version.
  */
 export class UnsupportedStatistic<T, U> extends Statistic<T, U> {
-    constructor(statisticParams: ConstructorParameters<typeof Statistic<T, U>>[0]) {
+    constructor(statisticParams: BaseStatistic<T, U>) {
         super(statisticParams);
     }
 
