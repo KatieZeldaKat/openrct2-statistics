@@ -1,32 +1,49 @@
 // @ts-ignore
 import * as info from "../info.js";
-import { createStatWidget } from "../window/createStatWidget";
+import { createStatWidget, createUnsupportedStatWidget } from "../window/createWidget.js";
 import { areStatisticsPaused } from "./../window/windowPause";
 import { WritableStore, store } from "openrct2-flexui";
 
-export class Statistic<T, U> {
+interface BaseStatistic<T, U> {
     /** The save/load key. */
-    statKey!: string;
+    statKey: string;
 
     /** The display name on the widget. */
-    statName!: string;
-
-    /** The store that holds the value of the game stat. */
-    gameStatStore!: WritableStore<U>;
-
-    /** The store that holds the value of the park stat. */
-    parkStatStore!: WritableStore<U>;
+    statName: string;
 
     /** The value when resetting the stat. */
-    resetValue!: U;
+    resetValue: U;
+
+    /**
+     * The required API version for the stat to be supported.
+     * If the player's version is lower than this, the stat will not be supported.
+     * Compare to {@link PluginMetadata.minApiVersion}, specifically for this statistic.
+     * If the statistic will run on any version of OpenRCT2, set this to `0`.
+     */
+    minimumApiVersion: number;
 
     /** The function that allows subscribing to updates of the statistic value. */
-    subscriber!: (updateStat: (newValue: T) => void) => void;
+    subscriber: (updateStat: (newValue: T) => void) => void;
 
     /** The function that accumulates the new value into the existing value. */
     accumulator: (newValue: T, existingValues: U) => U;
 
     /** The function that formats the value for display. */
+    formatDisplay: (value: U) => string;
+}
+
+export class Statistic<T, U> implements BaseStatistic<T, U> {
+    statKey: string;
+    statName: string;
+
+    gameStatStore!: WritableStore<U>;
+    parkStatStore!: WritableStore<U>;
+
+    resetValue: U;
+    minimumApiVersion: number;
+
+    subscriber: (updateStat: (newValue: T) => void) => void;
+    accumulator: (newValue: T, existingValues: U) => U;
     formatDisplay!: (value: U) => string;
 
     /** The widget that displays the stat. */
@@ -39,52 +56,37 @@ export class Statistic<T, U> {
         });
     }
 
-    constructor(
-        /** The save/load key. */
-        key: string,
+    /**
+     * Don't use this constructor directly; use `create` instead.
+     */
+    constructor(params: BaseStatistic<T, U>) {
+        this.statKey = params.statKey;
+        this.statName = params.statName;
+        this.resetValue = params.resetValue;
+        this.minimumApiVersion = params.minimumApiVersion;
+        this.subscriber = params.subscriber;
+        this.accumulator = params.accumulator;
+        this.formatDisplay = params.formatDisplay;
+    }
 
-        /** The display name on the widget. */
-        title: string,
-
-        /** The value when resetting the stat; should be an empty-ish value (0, "", [], etc.) */
-        resetValue: U,
-
-        /**
-         * The function that allows subscribing to updates of the statistic value.
-         * @param updateStat - A callback function to be called when the statistic value is updated.
-         *                     It takes a single parameter: the new value of the statistic.
-         */
-        subscriber: (updateStat: (newValue: T) => void) => void,
-
-        /**
-         * The function that accumulates the new value into the existing value.
-         * Could concatenate by adding, spreading into a new array, etc.
-         *
-         * @example
-         * function accumulateNewRide(newRide: RideStat, existingRides: RideStat[]) {
-         *   return [...existingRides, newRide];
-         * }
-         */
-        accumulator: (newValue: T, oldValue: U) => U,
-
-        /** The function that formats the value for display. */
-        formatDisplay: (value: U) => string,
-    ) {
-        this.statKey = key;
-        this.statName = title;
-        this.resetValue = resetValue;
-        this.subscriber = subscriber;
-        this.accumulator = accumulator;
-        this.formatDisplay = formatDisplay;
-
-        // Copilot says to bind the updateStat function to the class
-        // so that it can be passed as a callback
-        this.subscriber(this.updateStat.bind(this));
-
-        this.initialize();
+    /**
+     * Use to create a new statistic instead of the constructor.
+     * Handles checking if the API version is supported and initializes the stat.
+     */
+    static create<T, U>(params: BaseStatistic<T, U>) {
+        if (context.apiVersion < params.minimumApiVersion) {
+            return new UnsupportedStatistic(params);
+        } else {
+            const stat = new Statistic(params);
+            stat.initialize();
+            return stat;
+        }
     }
 
     initialize() {
+        // Attach subscriber to the stat updates
+        this.subscriber(this.updateStat.bind(this));
+
         this.initializeGameStatStore();
         this.initializeParkStatStore();
 
@@ -144,6 +146,23 @@ export class Statistic<T, U> {
             if (context.mode == "normal") {
                 context.getParkStorage().set(parkStatKey, newValue);
             }
+        });
+    }
+}
+
+/**
+ * A placeholder for a statistic that is not supported by the player's current version of OpenRCT2.
+ * Displays a message in the widget stating the required version.
+ */
+export class UnsupportedStatistic<T, U> extends Statistic<T, U> {
+    constructor(statisticParams: BaseStatistic<T, U>) {
+        super(statisticParams);
+    }
+
+    override get widget() {
+        return createUnsupportedStatWidget({
+            title: this.statName,
+            minimumApiVersion: this.minimumApiVersion,
         });
     }
 }

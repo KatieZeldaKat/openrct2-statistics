@@ -30,15 +30,17 @@ export const timeSpentStatistic = () => {
     const key = STATISTIC_KEY;
     const title = STATISTIC_TITLE;
     const resetValue = 0;
+    const minApiVersion = 0; // This statistic is supported in all versions
 
-    const statistic = new Statistic(
-        key,
-        title,
+    const statistic = Statistic.create({
+        statKey: key,
+        statName: title,
         resetValue,
-        subscribeToTimePassing,
-        accumulateSeconds,
+        minimumApiVersion: minApiVersion,
+        subscriber: subscribeToTimePassing,
+        accumulator: accumulateSeconds,
         formatDisplay,
-    );
+    });
 
     // LEGACY SUPPORT FOR TRACKING TIME IN-GAME
     const legacyGameTimeKey = "openrct2-statistics.time.gameTime";

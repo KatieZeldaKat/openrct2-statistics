@@ -8,7 +8,9 @@ import {
     horizontal,
     label,
     compute,
+    vertical,
 } from "openrct2-flexui";
+import { getGameVersionFromApiVersion } from "../helpers/apiToGameReleaseVersionMap";
 
 /**
  * Creates a stat widget with the given properties.
@@ -64,4 +66,35 @@ function getParkStatWidget<T>(statStore: Store<T>, processStat: (stat: T) => str
             visibility: isVisible,
         }),
     ]);
+}
+
+/**
+ * Creates a widget that displays a message that the stat is unsupported.
+ */
+export function createUnsupportedStatWidget(params: {
+    /** The title of your widget which will display in the box. */
+    title: string;
+    /** The api version required (which will be greater than what the player is using). */
+    minimumApiVersion: number;
+}): WidgetCreator<FlexiblePosition> {
+    const { title, minimumApiVersion } = params;
+    // returns undefined if the api version isn't yet supported
+    const gameVersion = getGameVersionFromApiVersion(minimumApiVersion);
+
+    const versionText = gameVersion
+        ? `This stat requires OpenRCT {RED}version ${gameVersion}\n{WHITE}or higher.`
+        : `This stat requires the {RED}latest development \nbuild{WHITE} version.`;
+
+    return groupbox({
+        text: title,
+        content: [
+            vertical([
+                label({ text: "-+- Unable to calculate statistic. -+-" }),
+                label({
+                    text: versionText,
+                    padding: { bottom: 10 },
+                }),
+            ]),
+        ],
+    });
 }
