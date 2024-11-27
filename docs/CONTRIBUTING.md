@@ -53,7 +53,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
 
     ```ts
     const subscribeToTimePassing = (
-        updatedValueCallback: (addedTime: TimeSpentStat) => void
+        updatedValueCallback: (addedTime: TimeSpentStat) => void,
     ) => {
         context.setInterval(() => {
             updatedValueCallback(1);
@@ -77,7 +77,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
         // in practice, newAmountOfTimePassed will always be 1 (for 1 second)
         function accumulateSecond(
             newAmountOfTimePassed: TimeSpendStat,
-            existingVal: TimeSpendStat
+            existingVal: TimeSpendStat,
         ) {
             return existingVal + newAmountOfTimePassed;
         }
