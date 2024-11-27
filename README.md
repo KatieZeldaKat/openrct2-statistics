@@ -8,6 +8,7 @@ A way for you to track your in-game statistics (overall and per-park) such as:
 
 ## Getting the plugin
 
+<!-- prettier-ignore -->
 > [!IMPORTANT]
 > Requires OpenRCT2 v0.4.0 or newer.
 
