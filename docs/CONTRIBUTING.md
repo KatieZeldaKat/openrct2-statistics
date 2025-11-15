@@ -52,9 +52,7 @@ This plugin offers easy extensibility for tracking new statistics. Look through 
 3. Write a subscription function with a callback that subscribes to the event you're trying to track (a ride being destroyed, a second passing, a piece of scenery being placed, etc.), that calls back when the event happens. (Note, the calling back happens inside a Statistic object, so you can ignore that part of it.)
 
     ```ts
-    const subscribeToTimePassing = (
-        updatedValueCallback: (addedTime: TimeSpentStat) => void,
-    ) => {
+    const subscribeToTimePassing = (updatedValueCallback: (addedTime: TimeSpentStat) => void) => {
         context.setInterval(() => {
             updatedValueCallback(1);
         }, 1000);
