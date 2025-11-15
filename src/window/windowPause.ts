@@ -21,9 +21,7 @@ const FLAG_CLOSED_ICON = 5179;
 export const areStatisticsPaused = store(context.sharedStorage.get(STATS_PAUSED_KEY, false));
 
 export function getPausedWidget(): WidgetCreator<FlexiblePosition> {
-    areStatisticsPaused.subscribe((paused) =>
-        context.sharedStorage.set(STATS_PAUSED_KEY, paused),
-    );
+    areStatisticsPaused.subscribe((paused) => context.sharedStorage.set(STATS_PAUSED_KEY, paused));
 
     return groupbox({
         text: "Pause Statistics",

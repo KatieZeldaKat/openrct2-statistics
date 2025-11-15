@@ -20,9 +20,7 @@ export function getResetWidget(sc: StatController): WidgetCreator<FlexiblePositi
     events.parkName.subscribe((newName) => parkName.set(parkNameFormat(newName)));
 
     let isParkWidgetVisible = store(getElementVisibility(events.isInPark.get()));
-    events.isInPark.subscribe((inPark) =>
-        isParkWidgetVisible.set(getElementVisibility(inPark)),
-    );
+    events.isInPark.subscribe((inPark) => isParkWidgetVisible.set(getElementVisibility(inPark)));
 
     return groupbox({
         text: "Reset Statistics",
